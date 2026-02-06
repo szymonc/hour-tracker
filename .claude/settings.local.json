@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(docker compose config:*)",
+      "Bash(docker compose:*)",
+      "Bash(DATABASE_PORT=5433 docker compose up:*)",
+      "Bash(pkill:*)",
+      "Bash(DATABASE_PORT=5433 DATABASE_PASSWORD=hlogger_dev_password docker compose:*)",
+      "Bash(curl:*)",
+      "Bash(npx playwright:*)",
+      "Bash(node /tmp/browser-test.js:*)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm test:*)",
+      "Bash(npx storybook@latest init:*)",
+      "Bash(npm run build-storybook:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs:*)",
+      "Bash(for i in 1 2 3 4 5 6)",
+      "Bash(do curl -s http://localhost:3000/api/v1/health)",
+      "Bash(break)",
+      "Bash(done)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(npm show:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "whatsapp"
+  ]
+}
