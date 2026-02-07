@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { map, exhaustMap, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AdminActions } from './admin.actions';
-import { AdminDashboard } from './admin.reducer';
+import { AdminDashboard, PendingUser } from './admin.reducer';
 
 @Injectable()
 export class AdminEffects {
@@ -25,6 +25,48 @@ export class AdminEffects {
           }),
           catchError((error) =>
             of(AdminActions.loadDashboardFailure({ error: error.error?.message || 'Failed to load dashboard' }))
+          )
+        )
+      )
+    )
+  );
+
+  loadPendingUsers$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AdminActions.loadPendingUsers),
+      exhaustMap(() =>
+        this.http.get<PendingUser[]>(`${environment.apiUrl}/admin/pending-users`).pipe(
+          map((users) => AdminActions.loadPendingUsersSuccess({ users })),
+          catchError((error) =>
+            of(AdminActions.loadPendingUsersFailure({ error: error.error?.message || 'Failed to load pending users' }))
+          )
+        )
+      )
+    )
+  );
+
+  approveUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AdminActions.approveUser),
+      exhaustMap(({ userId }) =>
+        this.http.post(`${environment.apiUrl}/admin/users/${userId}/approve`, {}).pipe(
+          map(() => AdminActions.approveUserSuccess({ userId })),
+          catchError((error) =>
+            of(AdminActions.approveUserFailure({ error: error.error?.message || 'Failed to approve user' }))
+          )
+        )
+      )
+    )
+  );
+
+  declineUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AdminActions.declineUser),
+      exhaustMap(({ userId }) =>
+        this.http.post(`${environment.apiUrl}/admin/users/${userId}/decline`, {}).pipe(
+          map(() => AdminActions.declineUserSuccess({ userId })),
+          catchError((error) =>
+            of(AdminActions.declineUserFailure({ error: error.error?.message || 'Failed to decline user' }))
           )
         )
       )

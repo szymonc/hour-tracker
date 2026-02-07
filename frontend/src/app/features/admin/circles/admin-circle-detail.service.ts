@@ -18,6 +18,7 @@ export interface CircleMember {
   userName: string;
   userEmail: string;
   joinedAt: string;
+  trackingStartDate: string;
 }
 
 export interface AvailableUser {
@@ -57,5 +58,13 @@ export class AdminCircleDetailService {
 
   removeMember(circleId: string, userId: string): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/admin/circles/${circleId}/members/${userId}`);
+  }
+
+  updateMembership(
+    circleId: string,
+    userId: string,
+    data: { trackingStartDate?: string },
+  ): Observable<unknown> {
+    return this.http.patch(`${this.apiUrl}/admin/circles/${circleId}/members/${userId}`, data);
   }
 }

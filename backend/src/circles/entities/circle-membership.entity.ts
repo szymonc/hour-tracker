@@ -35,6 +35,14 @@ export class CircleMembership {
   @Column({ type: 'timestamptz', nullable: true })
   leftAt: Date | null;
 
+  /**
+   * The date from which to start tracking hours for this membership.
+   * Defaults to joinedAt if not set. Admins can modify this to change
+   * when hour tracking begins for a user in a circle.
+   */
+  @Column({ type: 'timestamptz', nullable: true })
+  trackingStartDate: Date | null;
+
   @ManyToOne(() => User, (user) => user.memberships, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -42,4 +50,11 @@ export class CircleMembership {
   @ManyToOne(() => Circle, (circle) => circle.memberships, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'circleId' })
   circle: Circle;
+
+  /**
+   * Returns the effective tracking start date (trackingStartDate if set, otherwise joinedAt)
+   */
+  getEffectiveTrackingStartDate(): Date {
+    return this.trackingStartDate ?? this.joinedAt;
+  }
 }

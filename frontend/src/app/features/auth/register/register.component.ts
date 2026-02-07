@@ -9,9 +9,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthActions } from '../../../store/auth/auth.actions';
 import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-register',
@@ -26,13 +29,25 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
+    TranslateModule,
   ],
   template: `
     <div class="register-container">
+      <div class="language-selector">
+        <mat-form-field appearance="outline">
+          <mat-select [value]="languageService.currentLanguage" (selectionChange)="onLanguageChange($event.value)">
+            @for (lang of languageService.supportedLanguages; track lang.code) {
+              <mat-option [value]="lang.code">{{ lang.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       <mat-card class="register-card">
         <mat-card-header>
-          <mat-card-title>Create Account</mat-card-title>
-          <mat-card-subtitle>Join Circle Hours Logger</mat-card-subtitle>
+          <mat-card-title>{{ 'auth.register' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'app.name' | translate }}</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
@@ -42,26 +57,26 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
 
           <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Full Name</mat-label>
+              <mat-label>{{ 'auth.name' | translate }}</mat-label>
               <input matInput formControlName="name" autocomplete="name" />
               @if (registerForm.get('name')?.hasError('required')) {
-                <mat-error>Name is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Email</mat-label>
+              <mat-label>{{ 'auth.email' | translate }}</mat-label>
               <input matInput type="email" formControlName="email" autocomplete="email" />
               @if (registerForm.get('email')?.hasError('required')) {
-                <mat-error>Email is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (registerForm.get('email')?.hasError('email')) {
-                <mat-error>Please enter a valid email</mat-error>
+                <mat-error>{{ 'validation.email' | translate }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Password</mat-label>
+              <mat-label>{{ 'auth.password' | translate }}</mat-label>
               <input
                 matInput
                 [type]="hidePassword ? 'password' : 'text'"
@@ -71,12 +86,11 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
               <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
                 <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
-              <mat-hint>Min 8 chars with uppercase, lowercase, and number</mat-hint>
               @if (registerForm.get('password')?.hasError('required')) {
-                <mat-error>Password is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (registerForm.get('password')?.hasError('minlength')) {
-                <mat-error>Password must be at least 8 characters</mat-error>
+                <mat-error>{{ 'validation.minLength' | translate: {length: 8} }}</mat-error>
               }
             </mat-form-field>
 
@@ -90,7 +104,7 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
               @if (isLoading$ | async) {
                 <mat-spinner diameter="20"></mat-spinner>
               } @else {
-                Create Account
+                {{ 'auth.register' | translate }}
               }
             </button>
           </form>
@@ -98,8 +112,8 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
 
         <mat-card-actions>
           <p class="login-link">
-            Already have an account?
-            <a routerLink="/login">Sign in</a>
+            {{ 'auth.hasAccount' | translate }}
+            <a routerLink="/login">{{ 'auth.signIn' | translate }}</a>
           </p>
         </mat-card-actions>
       </mat-card>
@@ -109,10 +123,21 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
     .register-container {
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 16px;
       background: linear-gradient(135deg, #e8f5e9 0%, #f3e5f5 100%);
+    }
+
+    .language-selector {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+
+      mat-form-field {
+        width: 120px;
+      }
     }
 
     .register-card {
@@ -163,6 +188,7 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
 export class RegisterComponent {
   private fb = inject(FormBuilder);
   private store = inject(Store);
+  languageService = inject(LanguageService);
 
   isLoading$ = this.store.select(selectIsLoading);
   error$ = this.store.select(selectError);
@@ -180,5 +206,9 @@ export class RegisterComponent {
       const { name, email, password } = this.registerForm.value;
       this.store.dispatch(AuthActions.register({ name, email, password }));
     }
+  }
+
+  onLanguageChange(langCode: string): void {
+    this.languageService.setLanguage(langCode);
   }
 }

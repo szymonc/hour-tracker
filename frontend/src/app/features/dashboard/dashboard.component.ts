@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { selectUser } from '../../store/auth/auth.selectors';
 import { SummariesActions } from '../../store/summaries/summaries.actions';
@@ -27,14 +28,15 @@ import {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    TranslateModule,
   ],
   template: `
     <div class="dashboard-container page-container">
       <header class="dashboard-header">
-        <h1>Welcome back, {{ ((user$ | async)?.name?.split(' ') ?? [])[0] ?? 'User' }}!</h1>
+        <h1>{{ 'dashboard.welcome' | translate }}, {{ ((user$ | async)?.name?.split(' ') ?? [])[0] ?? 'User' }}!</h1>
         <button mat-raised-button color="primary" routerLink="/app/log-hours">
           <mat-icon>add</mat-icon>
-          Log Hours
+          {{ 'nav.logHours' | translate }}
         </button>
       </header>
 
@@ -43,7 +45,7 @@ import {
           <p class="error-message">{{ errorMessage }}</p>
           <button mat-raised-button color="primary" (click)="retry()">
             <mat-icon>refresh</mat-icon>
-            Retry
+            {{ 'common.retry' | translate }}
           </button>
         </div>
       } @else {
@@ -51,14 +53,14 @@ import {
           <!-- Period Total Card -->
           <mat-card class="summary-card">
             <mat-card-header>
-              <mat-card-title>Last 4 Weeks</mat-card-title>
+              <mat-card-title>{{ 'dashboard.last4Weeks' | translate }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               @if (isLoading$ | async) {
                 <div class="card-loading"><mat-spinner diameter="32"></mat-spinner></div>
               } @else {
                 <div class="big-number">{{ periodTotal$ | async }}h</div>
-                <p class="target-info">Target: 8h (2h/week)</p>
+                <p class="target-info">{{ 'dashboard.target' | translate }}: 8h (2h/{{ 'dashboard.week' | translate }})</p>
               }
             </mat-card-content>
           </mat-card>
@@ -66,7 +68,7 @@ import {
           <!-- Weekly Breakdown -->
           <mat-card class="weeks-card">
             <mat-card-header>
-              <mat-card-title>Weekly Breakdown</mat-card-title>
+              <mat-card-title>{{ 'dashboard.weeklyBreakdown' | translate }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               @if (isLoading$ | async) {
@@ -77,11 +79,11 @@ import {
                     <span class="week-date">{{ formatWeek(week.weekStartDate) }}</span>
                     <span class="week-hours">{{ week.totalHours }}h</span>
                     <span class="status-badge" [class]="'status-' + week.status">
-                      {{ formatStatus(week.status) }}
+                      {{ getStatusTranslation(week.status) | translate }}
                     </span>
                   </div>
                 } @empty {
-                  <p class="empty-message">No entries logged yet</p>
+                  <p class="empty-message">{{ 'dashboard.noEntries' | translate }}</p>
                 }
               }
             </mat-card-content>
@@ -90,20 +92,20 @@ import {
           <!-- Quick Actions (always visible) -->
           <mat-card class="actions-card">
             <mat-card-header>
-              <mat-card-title>Quick Actions</mat-card-title>
+              <mat-card-title>{{ 'dashboard.quickActions' | translate }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <button mat-stroked-button routerLink="/app/log-hours" class="action-button">
                 <mat-icon>add_circle</mat-icon>
-                Log Hours
+                {{ 'dashboard.logNewHours' | translate }}
               </button>
               <button mat-stroked-button routerLink="/app/history" class="action-button">
                 <mat-icon>history</mat-icon>
-                View History
+                {{ 'dashboard.viewHistory' | translate }}
               </button>
               <button mat-stroked-button routerLink="/app/profile" class="action-button">
                 <mat-icon>person</mat-icon>
-                Edit Profile
+                {{ 'dashboard.editProfile' | translate }}
               </button>
             </mat-card-content>
           </mat-card>
@@ -237,6 +239,7 @@ import {
 })
 export class DashboardComponent implements OnInit {
   private store = inject(Store);
+  private translate = inject(TranslateService);
 
   user$ = this.store.select(selectUser);
   summaries$ = this.store.select(selectWeeklySummaries);
@@ -260,19 +263,20 @@ export class DashboardComponent implements OnInit {
 
   formatWeek(weekStart: string): string {
     const date = new Date(weekStart);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const lang = this.translate.currentLang || 'en';
+    return date.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric' });
   }
 
-  formatStatus(status: string): string {
+  getStatusTranslation(status: string): string {
     switch (status) {
       case 'met':
-        return 'Met';
+        return 'dashboard.status.met';
       case 'under_target':
-        return 'Under';
+        return 'dashboard.status.under';
       case 'zero_reason':
-        return '0h Reason';
+        return 'dashboard.status.zeroReason';
       case 'missing':
-        return 'Missing';
+        return 'dashboard.status.missing';
       default:
         return status;
     }

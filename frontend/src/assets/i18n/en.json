@@ -34,7 +34,14 @@
     "registerSuccess": "Registration successful",
     "registerFailed": "Registration failed",
     "loggingIn": "Logging in...",
-    "registering": "Registering..."
+    "registering": "Registering...",
+    "pendingApproval": {
+      "title": "Pending Approval",
+      "subtitle": "Your account is awaiting admin approval",
+      "welcome": "Welcome",
+      "message": "Your account has been created successfully. However, an administrator needs to approve your account before you can access the application.",
+      "contact": "Please contact your administrator if you need immediate access."
+    }
   },
   "validation": {
     "required": "This field is required",
@@ -49,15 +56,25 @@
     "title": "Dashboard",
     "welcome": "Welcome back",
     "thisWeek": "This Week",
+    "last4Weeks": "Last 4 Weeks",
+    "weeklyBreakdown": "Weekly Breakdown",
     "weeklyProgress": "Weekly Progress",
     "hoursLogged": "hours logged",
     "target": "Target",
+    "week": "week",
     "hours": "hours",
     "recentEntries": "Recent Entries",
-    "noEntries": "No entries yet",
+    "noEntries": "No entries logged yet",
     "quickActions": "Quick Actions",
     "logNewHours": "Log New Hours",
-    "viewHistory": "View History"
+    "viewHistory": "View History",
+    "editProfile": "Edit Profile",
+    "status": {
+      "met": "Met",
+      "under": "Under",
+      "zeroReason": "0h Reason",
+      "missing": "Missing"
+    }
   },
   "logHours": {
     "title": "Log Hours",
@@ -76,15 +93,17 @@
   },
   "history": {
     "title": "History",
-    "filter": "Filter",
+    "filters": "Filters",
     "allCircles": "All Circles",
     "week": "Week",
     "circle": "Circle",
-    "hoursColumn": "Hours",
-    "descriptionColumn": "Description",
-    "dateColumn": "Date",
+    "hours": "Hours",
+    "description": "Description",
+    "date": "Date",
     "noEntries": "No entries found",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "showing": "Showing",
+    "entries": "entries"
   },
   "profile": {
     "title": "Profile",
@@ -118,7 +137,17 @@
       "consecutiveWeeks": "Missing 2+ Weeks",
       "recentEntries": "Recent Entries",
       "circleMetrics": "Circle Metrics",
-      "noData": "No data available"
+      "noData": "No data available",
+      "user": "User",
+      "hours": "Hours",
+      "status": "Status",
+      "viewAll": "View All",
+      "pendingApprovals": "Pending Approvals",
+      "pendingApprovalsSubtitle": "users awaiting approval",
+      "registeredAt": "Registered",
+      "approve": "Approve",
+      "decline": "Decline",
+      "noPendingApprovals": "No users pending approval"
     },
     "users": {
       "title": "Users",
@@ -128,7 +157,8 @@
       "phone": "Phone",
       "circles": "Circles",
       "actions": "Actions",
-      "noUsers": "No users found"
+      "noUsers": "No users found",
+      "role": "Role"
     },
     "circles": {
       "title": "Circles",
@@ -148,7 +178,8 @@
       "createSuccess": "Circle created successfully",
       "createFailed": "Failed to create circle",
       "deleteSuccess": "Circle deleted successfully",
-      "deleteFailed": "Failed to delete circle"
+      "deleteFailed": "Failed to delete circle",
+      "status": "Status"
     },
     "circleDetail": {
       "backToCircles": "Back to Circles",
@@ -160,7 +191,9 @@
       "noMembers": "No members yet. Add one above.",
       "removeConfirm": "Remove {{name}} from this circle?",
       "backfillHours": "Backfill hours",
-      "removeMember": "Remove member"
+      "removeMember": "Remove member",
+      "trackingStart": "Tracking Start",
+      "editTrackingStart": "Edit tracking start date"
     },
     "reports": {
       "title": "Reports",
@@ -169,7 +202,8 @@
       "from": "From",
       "to": "To",
       "generate": "Generate Report",
-      "generating": "Generating..."
+      "generating": "Generating...",
+      "description": "Generate CSV reports for hours logged within a date range."
     },
     "reminders": {
       "title": "Reminders",
@@ -177,7 +211,10 @@
       "selectWeek": "Select Week",
       "usersToRemind": "Users to Remind",
       "status": "Status",
-      "noReminders": "No reminders needed for this week"
+      "noReminders": "No reminders needed for this week",
+      "phone": "Phone",
+      "name": "Name",
+      "hoursLogged": "Hours Logged"
     },
     "backfill": {
       "title": "Backfill Hours",
@@ -212,7 +249,9 @@
     "yes": "Yes",
     "no": "No",
     "actions": "Actions",
-    "noData": "No data available"
+    "noData": "No data available",
+    "retry": "Retry",
+    "search": "Search"
   },
   "languages": {
     "en": "English",

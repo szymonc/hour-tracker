@@ -7,9 +7,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AdminActions } from '../../../store/admin/admin.actions';
-import { selectDashboard, selectDashboardLoading } from '../../../store/admin/admin.reducer';
+import {
+  selectDashboard,
+  selectDashboardLoading,
+  selectPendingUsers,
+  selectPendingUsersLoading,
+  selectPendingActionLoading,
+} from '../../../store/admin/admin.reducer';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -22,10 +29,45 @@ import { selectDashboard, selectDashboardLoading } from '../../../store/admin/ad
     MatIconModule,
     MatTableModule,
     MatProgressSpinnerModule,
+    TranslateModule,
   ],
   template: `
     <div class="admin-dashboard page-container">
-      <h1>Admin Dashboard</h1>
+      <h1>{{ 'admin.dashboard.title' | translate }}</h1>
+
+      <!-- Pending Approvals Section - Always at top -->
+      @if (pendingUsers$ | async; as pendingUsers) {
+        @if (pendingUsers.length > 0) {
+          <mat-card class="pending-approvals-card">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="pending-icon">person_add</mat-icon>
+              <mat-card-title>{{ 'admin.dashboard.pendingApprovals' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ pendingUsers.length }} {{ 'admin.dashboard.pendingApprovalsSubtitle' | translate }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @for (user of pendingUsers; track user.id) {
+                <div class="pending-user-row">
+                  <div class="user-info">
+                    <span class="user-name">{{ user.name }}</span>
+                    <span class="user-email">{{ user.email }}</span>
+                    <span class="user-date">{{ 'admin.dashboard.registeredAt' | translate }}: {{ user.createdAt | date:'short' }}</span>
+                  </div>
+                  <div class="user-actions">
+                    <button mat-raised-button color="primary" (click)="approveUser(user.id)" [disabled]="pendingActionLoading$ | async">
+                      <mat-icon>check</mat-icon>
+                      {{ 'admin.dashboard.approve' | translate }}
+                    </button>
+                    <button mat-stroked-button color="warn" (click)="declineUser(user.id)" [disabled]="pendingActionLoading$ | async">
+                      <mat-icon>close</mat-icon>
+                      {{ 'admin.dashboard.decline' | translate }}
+                    </button>
+                  </div>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+      }
 
       @if (isLoading$ | async) {
         <div class="loading-container">
@@ -37,25 +79,25 @@ import { selectDashboard, selectDashboardLoading } from '../../../store/admin/ad
           <!-- Status Counts -->
           <mat-card class="status-card">
             <mat-card-header>
-              <mat-card-title>Previous Week Status</mat-card-title>
+              <mat-card-title>{{ 'admin.dashboard.previousWeek' | translate }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div class="status-grid">
                 <div class="status-item status-met">
                   <span class="count">{{ dashboard.statusCounts.met }}</span>
-                  <span class="label">Met Target</span>
+                  <span class="label">{{ 'admin.dashboard.metTarget' | translate }}</span>
                 </div>
                 <div class="status-item status-under">
                   <span class="count">{{ dashboard.statusCounts.underTarget }}</span>
-                  <span class="label">Under Target</span>
+                  <span class="label">{{ 'admin.dashboard.underTarget' | translate }}</span>
                 </div>
                 <div class="status-item status-missing">
                   <span class="count">{{ dashboard.statusCounts.missing }}</span>
-                  <span class="label">Missing</span>
+                  <span class="label">{{ 'admin.dashboard.missing' | translate }}</span>
                 </div>
                 <div class="status-item status-zero">
                   <span class="count">{{ dashboard.statusCounts.zeroReason }}</span>
-                  <span class="label">0h with Reason</span>
+                  <span class="label">{{ 'admin.dashboard.zeroWithReason' | translate }}</span>
                 </div>
               </div>
             </mat-card-content>
@@ -64,21 +106,21 @@ import { selectDashboard, selectDashboardLoading } from '../../../store/admin/ad
           <!-- Missing Users -->
           <mat-card class="missing-card" data-testid="missing-1-week">
             <mat-card-header>
-              <mat-card-title>Missing Previous Week</mat-card-title>
-              <mat-card-subtitle>{{ dashboard.missingPreviousWeek.count }} users</mat-card-subtitle>
+              <mat-card-title>{{ 'admin.dashboard.missingUsers' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ dashboard.missingPreviousWeek.count }} {{ 'nav.users' | translate | lowercase }}</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
               @for (user of dashboard.missingPreviousWeek.users.slice(0, 5); track user.id) {
                 <div class="user-row">
                   <span>{{ user.name }}</span>
                   <span class="status-badge" [class]="'status-' + user.status">
-                    {{ user.status === 'missing' ? 'Missing' : user.totalHours + 'h' }}
+                    {{ user.status === 'missing' ? ('admin.dashboard.missing' | translate) : user.totalHours + 'h' }}
                   </span>
                 </div>
               }
               @if (dashboard.missingPreviousWeek.count > 5) {
                 <p class="more-link">
-                  <a routerLink="/admin/users">View all {{ dashboard.missingPreviousWeek.count }} users</a>
+                  <a routerLink="/admin/users">{{ 'admin.dashboard.viewAll' | translate }} ({{ dashboard.missingPreviousWeek.count }})</a>
                 </p>
               }
             </mat-card-content>
@@ -87,18 +129,18 @@ import { selectDashboard, selectDashboardLoading } from '../../../store/admin/ad
           <!-- 2-Week Missing -->
           <mat-card class="missing-card" data-testid="missing-2-weeks">
             <mat-card-header>
-              <mat-card-title>Missing 2+ Weeks</mat-card-title>
-              <mat-card-subtitle>{{ dashboard.missingTwoWeeks.count }} users</mat-card-subtitle>
+              <mat-card-title>{{ 'admin.dashboard.consecutiveWeeks' | translate }}</mat-card-title>
+              <mat-card-subtitle>{{ dashboard.missingTwoWeeks.count }} {{ 'nav.users' | translate | lowercase }}</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
               @for (user of dashboard.missingTwoWeeks.users.slice(0, 5); track user.id) {
                 <div class="user-row priority">
                   <span>{{ user.name }}</span>
-                  <span class="badge">{{ user.consecutiveMissingWeeks }} weeks</span>
+                  <span class="badge">{{ user.consecutiveMissingWeeks }} {{ 'dashboard.week' | translate }}s</span>
                 </div>
               }
               @empty {
-                <p class="empty-message">No users missing 2+ weeks</p>
+                <p class="empty-message">{{ 'admin.dashboard.noData' | translate }}</p>
               }
             </mat-card-content>
           </mat-card>
@@ -106,7 +148,7 @@ import { selectDashboard, selectDashboardLoading } from '../../../store/admin/ad
           <!-- Recent Entries -->
           <mat-card class="recent-card">
             <mat-card-header>
-              <mat-card-title>Recent Entries</mat-card-title>
+              <mat-card-title>{{ 'admin.dashboard.recentEntries' | translate }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               @for (entry of dashboard.recentEntries.slice(0, 5); track entry.id) {
@@ -120,22 +162,22 @@ import { selectDashboard, selectDashboardLoading } from '../../../store/admin/ad
           </mat-card>
         </div>
         } @else {
-          <p class="no-data">No dashboard data available.</p>
+          <p class="no-data">{{ 'admin.dashboard.noData' | translate }}</p>
         }
 
         <!-- Quick Actions (always visible when not loading) -->
         <div class="actions-bar">
           <button mat-stroked-button routerLink="/admin/users">
-            <mat-icon>people</mat-icon> Manage Users
+            <mat-icon>people</mat-icon> {{ 'nav.users' | translate }}
           </button>
           <button mat-stroked-button routerLink="/admin/circles">
-            <mat-icon>group_work</mat-icon> Manage Circles
+            <mat-icon>group_work</mat-icon> {{ 'nav.circles' | translate }}
           </button>
           <button mat-stroked-button routerLink="/admin/reports">
-            <mat-icon>download</mat-icon> Export Reports
+            <mat-icon>download</mat-icon> {{ 'nav.reports' | translate }}
           </button>
           <button mat-stroked-button routerLink="/admin/reminders">
-            <mat-icon>notifications</mat-icon> Reminder Targets
+            <mat-icon>notifications</mat-icon> {{ 'nav.reminders' | translate }}
           </button>
         </div>
       }
@@ -149,6 +191,71 @@ import { selectDashboard, selectDashboardLoading } from '../../../store/admin/ad
 
     h1 {
       margin-bottom: 24px;
+    }
+
+    .pending-approvals-card {
+      margin-bottom: 24px;
+      border-left: 4px solid #ff9800;
+      background-color: #fff8e1;
+    }
+
+    .pending-approvals-card mat-card-header {
+      margin-bottom: 16px;
+    }
+
+    .pending-icon {
+      background-color: #ff9800;
+      color: white;
+      padding: 8px;
+      border-radius: 50%;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pending-user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .user-name {
+        font-weight: 500;
+        font-size: 16px;
+      }
+
+      .user-email {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 14px;
+      }
+
+      .user-date {
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 12px;
+      }
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 8px;
+
+      button mat-icon {
+        margin-right: 4px;
+      }
     }
 
     .dashboard-grid {
@@ -285,8 +392,22 @@ export class AdminDashboardComponent implements OnInit {
 
   dashboard$ = this.store.select(selectDashboard);
   isLoading$ = this.store.select(selectDashboardLoading);
+  pendingUsers$ = this.store.select(selectPendingUsers);
+  pendingUsersLoading$ = this.store.select(selectPendingUsersLoading);
+  pendingActionLoading$ = this.store.select(selectPendingActionLoading);
 
   ngOnInit(): void {
     this.store.dispatch(AdminActions.loadDashboard());
+    this.store.dispatch(AdminActions.loadPendingUsers());
+  }
+
+  approveUser(userId: string): void {
+    this.store.dispatch(AdminActions.approveUser({ userId }));
+  }
+
+  declineUser(userId: string): void {
+    if (confirm('Are you sure you want to decline this user? This will delete their account.')) {
+      this.store.dispatch(AdminActions.declineUser({ userId }));
+    }
   }
 }

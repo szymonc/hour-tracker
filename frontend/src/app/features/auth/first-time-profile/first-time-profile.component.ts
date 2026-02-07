@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthActions } from '../../../store/auth/auth.actions';
 import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors';
@@ -24,6 +25,7 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    TranslateModule,
   ],
   template: `
     <div class="profile-container">
@@ -31,9 +33,9 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
         <mat-card-header>
           <mat-card-title>
             <mat-icon>phone</mat-icon>
-            Complete Your Profile
+            {{ 'firstTimeProfile.title' | translate }}
           </mat-card-title>
-          <mat-card-subtitle>Please add your phone number to continue</mat-card-subtitle>
+          <mat-card-subtitle>{{ 'firstTimeProfile.subtitle' | translate }}</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
@@ -41,25 +43,21 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
             <div class="error-message">{{ error }}</div>
           }
 
-          <p class="info-text">
-            Your phone number will be used for reminders about your weekly contribution hours.
-          </p>
-
           <form [formGroup]="phoneForm" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Phone Number</mat-label>
+              <mat-label>{{ 'profile.phone' | translate }}</mat-label>
               <input
                 matInput
                 type="tel"
                 formControlName="phoneNumber"
-                placeholder="+34612345678"
+                [placeholder]="'profile.phonePlaceholder' | translate"
               />
-              <mat-hint>Use international format (e.g., +34612345678)</mat-hint>
+              <mat-hint>E.164 format (e.g., +34612345678)</mat-hint>
               @if (phoneForm.get('phoneNumber')?.hasError('required')) {
-                <mat-error>Phone number is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (phoneForm.get('phoneNumber')?.hasError('pattern')) {
-                <mat-error>Please use E.164 format (e.g., +34612345678)</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
@@ -73,7 +71,7 @@ import { selectIsLoading, selectError } from '../../../store/auth/auth.selectors
               @if (isLoading$ | async) {
                 <mat-spinner diameter="20"></mat-spinner>
               } @else {
-                Continue
+                {{ 'firstTimeProfile.continue' | translate }}
               }
             </button>
           </form>

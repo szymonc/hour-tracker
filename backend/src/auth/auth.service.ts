@@ -18,6 +18,7 @@ export interface TokenPayload {
   sub: string;
   email: string;
   role: UserRole;
+  isApproved: boolean;
 }
 
 export interface AuthTokens {
@@ -143,6 +144,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      isApproved: user.isApproved,
     };
 
     return this.jwtService.sign(payload);
@@ -153,6 +155,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      isApproved: user.isApproved,
     };
 
     return this.jwtService.sign(payload, {

@@ -6,6 +6,7 @@ export interface User {
   authProvider: 'local' | 'google';
   phoneNumber: string | null;
   isActive: boolean;
+  isApproved: boolean;
   createdAt: string;
   updatedAt?: string;
 }

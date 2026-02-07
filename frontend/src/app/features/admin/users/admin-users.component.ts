@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AdminActions } from '../../../store/admin/admin.actions';
 import { selectUsers, selectUsersLoading, selectUsersPagination } from '../../../store/admin/admin.reducer';
@@ -24,16 +25,17 @@ import { selectUsers, selectUsersLoading, selectUsersPagination } from '../../..
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    TranslateModule,
   ],
   template: `
     <div class="admin-users page-container">
-      <h1>Users</h1>
+      <h1>{{ 'admin.users.title' | translate }}</h1>
 
       <mat-card>
         <mat-card-content>
           <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Search users</mat-label>
-            <input matInput (input)="onSearch($event)" placeholder="Name or email..." />
+            <mat-label>{{ 'admin.users.search' | translate }}</mat-label>
+            <input matInput (input)="onSearch($event)" [placeholder]="'admin.users.search' | translate" />
             <mat-icon matSuffix>search</mat-icon>
           </mat-form-field>
 
@@ -44,22 +46,22 @@ import { selectUsers, selectUsersLoading, selectUsersPagination } from '../../..
           } @else {
             <table mat-table [dataSource]="(users$ | async) ?? []">
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.name' | translate }}</th>
                 <td mat-cell *matCellDef="let user">{{ user.name }}</td>
               </ng-container>
 
               <ng-container matColumnDef="email">
-                <th mat-header-cell *matHeaderCellDef>Email</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.email' | translate }}</th>
                 <td mat-cell *matCellDef="let user">{{ user.email }}</td>
               </ng-container>
 
               <ng-container matColumnDef="circles">
-                <th mat-header-cell *matHeaderCellDef>Circles</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.circles' | translate }}</th>
                 <td mat-cell *matCellDef="let user">{{ user.circles?.join(', ') || '-' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="phoneNumber">
-                <th mat-header-cell *matHeaderCellDef>Phone</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.phone' | translate }}</th>
                 <td mat-cell *matCellDef="let user">{{ user.phoneNumber || '-' }}</td>
               </ng-container>
 

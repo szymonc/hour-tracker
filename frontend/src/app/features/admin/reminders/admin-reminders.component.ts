@@ -6,6 +6,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AdminActions } from '../../../store/admin/admin.actions';
 import { selectReminderTargets, selectRemindersLoading, selectSelectedWeek } from '../../../store/admin/admin.reducer';
@@ -20,15 +21,16 @@ import { selectReminderTargets, selectRemindersLoading, selectSelectedWeek } fro
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    TranslateModule,
   ],
   template: `
     <div class="admin-reminders page-container">
-      <h1>Reminder Targets</h1>
+      <h1>{{ 'admin.reminders.title' | translate }}</h1>
 
       <mat-card>
         <mat-card-header>
-          <mat-card-title>Week: {{ selectedWeek$ | async }}</mat-card-title>
-          <mat-card-subtitle>Users who should receive reminders</mat-card-subtitle>
+          <mat-card-title>{{ 'admin.reminders.weekOf' | translate }}: {{ selectedWeek$ | async }}</mat-card-title>
+          <mat-card-subtitle>{{ 'admin.reminders.usersToRemind' | translate }}</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
@@ -37,25 +39,25 @@ import { selectReminderTargets, selectRemindersLoading, selectSelectedWeek } fro
           } @else {
             <table mat-table [dataSource]="(targets$ | async) ?? []">
               <ng-container matColumnDef="userName">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.reminders.name' | translate }}</th>
                 <td mat-cell *matCellDef="let t">{{ t.userName }}</td>
               </ng-container>
 
               <ng-container matColumnDef="userEmail">
-                <th mat-header-cell *matHeaderCellDef>Email</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.email' | translate }}</th>
                 <td mat-cell *matCellDef="let t">{{ t.userEmail }}</td>
               </ng-container>
 
               <ng-container matColumnDef="phoneNumber">
-                <th mat-header-cell *matHeaderCellDef>Phone</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.reminders.phone' | translate }}</th>
                 <td mat-cell *matCellDef="let t">{{ t.phoneNumber || 'N/A' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'admin.reminders.status' | translate }}</th>
                 <td mat-cell *matCellDef="let t">
                   <span class="status-badge" [class]="'status-' + t.status">
-                    {{ t.status === 'missing' ? 'Missing' : t.totalHours + 'h' }}
+                    {{ t.status === 'missing' ? ('admin.dashboard.missing' | translate) : t.totalHours + 'h' }}
                   </span>
                 </td>
               </ng-container>
@@ -67,8 +69,7 @@ import { selectReminderTargets, selectRemindersLoading, selectSelectedWeek } fro
             @if ((targets$ | async)?.length === 0) {
               <div class="empty-state">
                 <mat-icon>check_circle</mat-icon>
-                <h3>No reminders needed</h3>
-                <p>All users have met their target for this week</p>
+                <h3>{{ 'admin.reminders.noReminders' | translate }}</h3>
               </div>
             }
           }

@@ -26,6 +26,7 @@ import { UpdatePhoneDto } from './dto/update-phone.dto';
 import { CreateCircleDto } from './dto/create-circle.dto';
 import { AddCircleMemberDto } from './dto/add-circle-member.dto';
 import { AdminCreateEntryDto } from './dto/admin-create-entry.dto';
+import { UpdateMembershipDto } from './dto/update-membership.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -162,6 +163,25 @@ export class AdminController {
     return { success: true };
   }
 
+  @Patch('circles/:id/members/:userId')
+  @ApiOperation({ summary: 'Update membership settings (e.g., tracking start date)' })
+  @ApiResponse({ status: 200, description: 'Membership updated' })
+  @ApiResponse({ status: 404, description: 'Membership not found' })
+  async updateMembership(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body() dto: UpdateMembershipDto,
+  ) {
+    const membership = await this.adminService.updateMembership(id, userId, dto);
+    return {
+      id: membership.id,
+      userId: membership.userId,
+      circleId: membership.circleId,
+      joinedAt: membership.joinedAt,
+      trackingStartDate: membership.trackingStartDate,
+    };
+  }
+
   @Get('circles/:id/available-users')
   @ApiOperation({ summary: 'List users that can be added to the circle' })
   @ApiQuery({ name: 'search', required: false })
@@ -203,5 +223,36 @@ export class AdminController {
   async getUserCircles(@Param('id', ParseUUIDPipe) id: string) {
     const circles = await this.adminService.getUserCircles(id);
     return { circles };
+  }
+
+  @Get('pending-users')
+  @ApiOperation({ summary: 'Get users pending approval' })
+  @ApiResponse({ status: 200, description: 'Pending users retrieved' })
+  async getPendingUsers() {
+    const users = await this.adminService.getPendingUsers();
+    return { users };
+  }
+
+  @Post('users/:id/approve')
+  @ApiOperation({ summary: 'Approve a pending user' })
+  @ApiResponse({ status: 200, description: 'User approved' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async approveUser(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.adminService.approveUser(id);
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isApproved: user.isApproved,
+    };
+  }
+
+  @Post('users/:id/decline')
+  @ApiOperation({ summary: 'Decline/delete a pending user' })
+  @ApiResponse({ status: 200, description: 'User declined' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async declineUser(@Param('id', ParseUUIDPipe) id: string) {
+    await this.adminService.declineUser(id);
+    return { success: true };
   }
 }

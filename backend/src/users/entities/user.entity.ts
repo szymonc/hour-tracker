@@ -65,6 +65,14 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  /**
+   * Whether the user has been approved by an admin.
+   * New users start as unapproved and cannot access the app until approved.
+   */
+  @Column({ default: false })
+  @Index()
+  isApproved: boolean;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 

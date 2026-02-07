@@ -4,6 +4,7 @@ import { adminGuard } from './core/guards/admin.guard';
 import { userGuard } from './core/guards/user.guard';
 import { firstTimeGuard } from './core/guards/first-time.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { approvalGuard } from './core/guards/approval.guard';
 
 export const routes: Routes = [
   // Public routes
@@ -34,10 +35,17 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
 
+  // Pending approval page
+  {
+    path: 'pending-approval',
+    loadComponent: () => import('./features/auth/pending-approval/pending-approval.component').then(m => m.PendingApprovalComponent),
+    canActivate: [authGuard],
+  },
+
   // Protected user routes (not for admins)
   {
     path: 'app',
-    canActivate: [authGuard, firstTimeGuard, userGuard],
+    canActivate: [authGuard, firstTimeGuard, approvalGuard, userGuard],
     children: [
       {
         path: '',
@@ -66,7 +74,7 @@ export const routes: Routes = [
   // Admin routes (with separate shell/layout)
   {
     path: 'admin',
-    canActivate: [authGuard, firstTimeGuard, adminGuard],
+    canActivate: [authGuard, firstTimeGuard, approvalGuard, adminGuard],
     loadComponent: () => import('./features/admin/admin-shell.component').then(m => m.AdminShellComponent),
     children: [
       {

@@ -27,6 +27,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import {
   AdminCircleDetailService,
@@ -51,11 +54,14 @@ import {
     MatInputModule,
     MatAutocompleteModule,
     MatTooltipModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    TranslateModule,
   ],
   template: `
     <div class="admin-circle-detail page-container">
       <a routerLink="/admin/circles" class="back-link">
-        <mat-icon>arrow_back</mat-icon> Back to Circles
+        <mat-icon>arrow_back</mat-icon> {{ 'admin.circleDetail.backToCircles' | translate }}
       </a>
 
       @if (circle(); as c) {
@@ -67,18 +73,18 @@ import {
         <!-- Add member section -->
         <mat-card class="add-member-card">
           <mat-card-header>
-            <mat-card-title>Add Member</mat-card-title>
-            <mat-card-subtitle>{{ availableUsersCount() }} users available to add</mat-card-subtitle>
+            <mat-card-title>{{ 'admin.circleDetail.addMember' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ availableUsersCount() }} {{ 'admin.circleDetail.usersAvailable' | translate }}</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
             <div class="add-member">
               <mat-form-field appearance="outline" class="add-member-field">
-                <mat-label>Search users</mat-label>
+                <mat-label>{{ 'admin.circleDetail.searchUsers' | translate }}</mat-label>
                 <input
                   matInput
                   [formControl]="addMemberControl"
                   [matAutocomplete]="auto"
-                  placeholder="Search by name or email..."
+                  [placeholder]="'admin.circleDetail.searchPlaceholder' | translate"
                 />
                 <mat-icon matSuffix>person_add</mat-icon>
                 <mat-autocomplete
@@ -90,7 +96,7 @@ import {
                     <mat-option [value]="u">{{ u.name }} ({{ u.email }})</mat-option>
                   }
                   @empty {
-                    <mat-option disabled>No users found</mat-option>
+                    <mat-option disabled>{{ 'admin.users.noUsers' | translate }}</mat-option>
                   }
                 </mat-autocomplete>
               </mat-form-field>
@@ -101,7 +107,7 @@ import {
         <!-- Current members section -->
         <mat-card>
           <mat-card-header>
-            <mat-card-title>Current Members ({{ memberCount() }})</mat-card-title>
+            <mat-card-title>{{ 'admin.circleDetail.currentMembers' | translate }} ({{ memberCount() }})</mat-card-title>
           </mat-card-header>
           <mat-card-content>
 
@@ -110,15 +116,46 @@ import {
             } @else {
               <table mat-table [dataSource]="members()">
                 <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef>Name</th>
+                  <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.name' | translate }}</th>
                   <td mat-cell *matCellDef="let m">{{ m.userName }}</td>
                 </ng-container>
                 <ng-container matColumnDef="email">
-                  <th mat-header-cell *matHeaderCellDef>Email</th>
+                  <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.email' | translate }}</th>
                   <td mat-cell *matCellDef="let m">{{ m.userEmail }}</td>
                 </ng-container>
+                <ng-container matColumnDef="trackingStartDate">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'admin.circleDetail.trackingStart' | translate }}</th>
+                  <td mat-cell *matCellDef="let m">
+                    <div class="tracking-date-cell">
+                      @if (editingMemberId() === m.userId) {
+                        <mat-form-field appearance="outline" class="tracking-date-field">
+                          <input
+                            matInput
+                            [matDatepicker]="picker"
+                            [value]="getTrackingDate(m)"
+                            (dateChange)="onTrackingDateChange($event, m)"
+                          />
+                          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                        <button mat-icon-button (click)="cancelEditTrackingDate()">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      } @else {
+                        <span>{{ formatDate(m.trackingStartDate) }}</span>
+                        <button
+                          mat-icon-button
+                          (click)="startEditTrackingDate(m)"
+                          [matTooltip]="'admin.circleDetail.editTrackingStart' | translate"
+                        >
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </ng-container>
                 <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
                   <td mat-cell *matCellDef="let m">
                     <div class="action-buttons">
                       <button
@@ -126,7 +163,7 @@ import {
                         color="primary"
                         (click)="onBackfillHours(m)"
                         [attr.aria-label]="'Backfill hours for ' + m.userName"
-                        matTooltip="Backfill hours"
+                        [matTooltip]="'admin.circleDetail.backfillHours' | translate"
                       >
                         <mat-icon>history</mat-icon>
                       </button>
@@ -136,7 +173,7 @@ import {
                         (click)="onRemoveMember(m)"
                         [disabled]="actionLoading()"
                         [attr.aria-label]="'Remove ' + m.userName"
-                        matTooltip="Remove member"
+                        [matTooltip]="'admin.circleDetail.removeMember' | translate"
                       >
                         <mat-icon>person_remove</mat-icon>
                       </button>
@@ -147,7 +184,7 @@ import {
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
                 <tr class="mat-row" *matNoDataRow>
                   <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-                    No members yet. Add one above.
+                    {{ 'admin.circleDetail.noMembers' | translate }}
                   </td>
                 </tr>
               </table>
@@ -166,7 +203,7 @@ import {
     </div>
   `,
   styles: [`
-    .admin-circle-detail { max-width: 900px; margin: 0 auto; }
+    .admin-circle-detail { max-width: 1000px; margin: 0 auto; }
     .add-member-card { margin-bottom: 24px; }
     .back-link {
       display: inline-flex;
@@ -184,13 +221,29 @@ import {
     .loading-container { display: flex; justify-content: center; padding: 32px; }
     .error-message { color: var(--mat-form-field-error-text-color, #b71c1c); margin-top: 12px; }
     .mat-column-actions { width: 120px; }
+    .mat-column-trackingStartDate { width: 220px; }
     .action-buttons { display: flex; justify-content: flex-end; gap: 4px; }
+    .tracking-date-cell {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tracking-date-field {
+      width: 140px;
+      font-size: 12px;
+    }
+    .tracking-date-field ::ng-deep .mat-mdc-form-field-infix {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      min-height: 36px;
+    }
   `],
 })
 export class AdminCircleDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private service = inject(AdminCircleDetailService);
+  private translate = inject(TranslateService);
   private destroy$ = new Subject<void>();
 
   circle = signal<CircleDetail | null>(null);
@@ -203,9 +256,10 @@ export class AdminCircleDetailComponent implements OnInit, OnDestroy {
   availableUsersCount = computed(() => this.availableUsers().length);
   actionLoading = signal(false);
   error = signal<string | null>(null);
+  editingMemberId = signal<string | null>(null);
 
   addMemberControl = new FormControl<string | AvailableUser>('', { nonNullable: false });
-  displayedColumns = ['name', 'email', 'actions'];
+  displayedColumns = ['name', 'email', 'trackingStartDate', 'actions'];
 
   private circleId = '';
 
@@ -345,6 +399,60 @@ export class AdminCircleDetailComponent implements OnInit, OnDestroy {
           };
           this.availableUsers.update((list) =>
             list.some((u) => u.id === added.id) ? list : [added, ...list],
+          );
+        }
+      });
+  }
+
+  formatDate(dateStr: string): string {
+    const lang = this.translate.currentLang || 'en';
+    return new Date(dateStr).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  getTrackingDate(member: CircleMember): Date {
+    return new Date(member.trackingStartDate);
+  }
+
+  startEditTrackingDate(member: CircleMember): void {
+    this.editingMemberId.set(member.userId);
+  }
+
+  cancelEditTrackingDate(): void {
+    this.editingMemberId.set(null);
+  }
+
+  onTrackingDateChange(event: any, member: CircleMember): void {
+    const newDate = event.value as Date;
+    if (!newDate) return;
+
+    const dateStr = newDate.toISOString().split('T')[0];
+    this.actionLoading.set(true);
+    this.error.set(null);
+
+    this.service
+      .updateMembership(this.circleId, member.userId, { trackingStartDate: dateStr })
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError((err) => {
+          this.error.set(err.error?.message || 'Failed to update tracking start date');
+          return of(null);
+        }),
+      )
+      .subscribe((res) => {
+        this.actionLoading.set(false);
+        this.editingMemberId.set(null);
+        if (res !== null) {
+          // Update the member in the list
+          this.members.update((list) =>
+            list.map((m) =>
+              m.userId === member.userId
+                ? { ...m, trackingStartDate: newDate.toISOString() }
+                : m,
+            ),
           );
         }
       });

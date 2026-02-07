@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { AdminDashboard } from './admin.reducer';
+import { AdminDashboard, PendingUser } from './admin.reducer';
 
 export const AdminActions = createActionGroup({
   source: 'Admin',
@@ -8,6 +8,17 @@ export const AdminActions = createActionGroup({
     'Load Dashboard': emptyProps(),
     'Load Dashboard Success': props<{ dashboard: AdminDashboard }>(),
     'Load Dashboard Failure': props<{ error: string }>(),
+
+    // Pending Approvals
+    'Load Pending Users': emptyProps(),
+    'Load Pending Users Success': props<{ users: PendingUser[] }>(),
+    'Load Pending Users Failure': props<{ error: string }>(),
+    'Approve User': props<{ userId: string }>(),
+    'Approve User Success': props<{ userId: string }>(),
+    'Approve User Failure': props<{ error: string }>(),
+    'Decline User': props<{ userId: string }>(),
+    'Decline User Success': props<{ userId: string }>(),
+    'Decline User Failure': props<{ error: string }>(),
 
     // Users
     'Load Users': props<{ search?: string; page?: number }>(),

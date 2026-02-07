@@ -26,7 +26,7 @@
     "noAccount": "¿No tienes una cuenta?",
     "hasAccount": "¿Ya tienes una cuenta?",
     "signUp": "Regístrate",
-    "signIn": "Inicia sesión",
+    "signIn": "Iniciar sesión",
     "orContinueWith": "O continúa con",
     "google": "Google",
     "loginSuccess": "Inicio de sesión exitoso",
@@ -34,7 +34,14 @@
     "registerSuccess": "Registro exitoso",
     "registerFailed": "Error al registrarse",
     "loggingIn": "Iniciando sesión...",
-    "registering": "Registrando..."
+    "registering": "Registrando...",
+    "pendingApproval": {
+      "title": "Aprobación Pendiente",
+      "subtitle": "Tu cuenta está esperando aprobación del administrador",
+      "welcome": "Bienvenido",
+      "message": "Tu cuenta se ha creado exitosamente. Sin embargo, un administrador necesita aprobar tu cuenta antes de que puedas acceder a la aplicación.",
+      "contact": "Por favor contacta a tu administrador si necesitas acceso inmediato."
+    }
   },
   "validation": {
     "required": "Este campo es obligatorio",
@@ -49,15 +56,25 @@
     "title": "Panel",
     "welcome": "Bienvenido de nuevo",
     "thisWeek": "Esta Semana",
+    "last4Weeks": "Últimas 4 Semanas",
+    "weeklyBreakdown": "Desglose Semanal",
     "weeklyProgress": "Progreso Semanal",
     "hoursLogged": "horas registradas",
     "target": "Objetivo",
+    "week": "semana",
     "hours": "horas",
     "recentEntries": "Entradas Recientes",
-    "noEntries": "Sin entradas aún",
+    "noEntries": "Sin entradas registradas",
     "quickActions": "Acciones Rápidas",
     "logNewHours": "Registrar Nuevas Horas",
-    "viewHistory": "Ver Historial"
+    "viewHistory": "Ver Historial",
+    "editProfile": "Editar Perfil",
+    "status": {
+      "met": "Cumplido",
+      "under": "Bajo",
+      "zeroReason": "0h Razón",
+      "missing": "Faltante"
+    }
   },
   "logHours": {
     "title": "Registrar Horas",
@@ -76,15 +93,17 @@
   },
   "history": {
     "title": "Historial",
-    "filter": "Filtrar",
+    "filters": "Filtros",
     "allCircles": "Todos los Círculos",
     "week": "Semana",
     "circle": "Círculo",
-    "hoursColumn": "Horas",
-    "descriptionColumn": "Descripción",
-    "dateColumn": "Fecha",
+    "hours": "Horas",
+    "description": "Descripción",
+    "date": "Fecha",
     "noEntries": "No se encontraron entradas",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "showing": "Mostrando",
+    "entries": "entradas"
   },
   "profile": {
     "title": "Perfil",
@@ -118,7 +137,17 @@
       "consecutiveWeeks": "Faltantes 2+ Semanas",
       "recentEntries": "Entradas Recientes",
       "circleMetrics": "Métricas de Círculos",
-      "noData": "No hay datos disponibles"
+      "noData": "No hay datos disponibles",
+      "user": "Usuario",
+      "hours": "Horas",
+      "status": "Estado",
+      "viewAll": "Ver Todo",
+      "pendingApprovals": "Aprobaciones Pendientes",
+      "pendingApprovalsSubtitle": "usuarios esperando aprobación",
+      "registeredAt": "Registrado",
+      "approve": "Aprobar",
+      "decline": "Rechazar",
+      "noPendingApprovals": "No hay usuarios pendientes de aprobación"
     },
     "users": {
       "title": "Usuarios",
@@ -128,7 +157,8 @@
       "phone": "Teléfono",
       "circles": "Círculos",
       "actions": "Acciones",
-      "noUsers": "No se encontraron usuarios"
+      "noUsers": "No se encontraron usuarios",
+      "role": "Rol"
     },
     "circles": {
       "title": "Círculos",
@@ -148,7 +178,8 @@
       "createSuccess": "Círculo creado exitosamente",
       "createFailed": "Error al crear círculo",
       "deleteSuccess": "Círculo eliminado exitosamente",
-      "deleteFailed": "Error al eliminar círculo"
+      "deleteFailed": "Error al eliminar círculo",
+      "status": "Estado"
     },
     "circleDetail": {
       "backToCircles": "Volver a Círculos",
@@ -160,7 +191,9 @@
       "noMembers": "Sin miembros aún. Agrega uno arriba.",
       "removeConfirm": "¿Eliminar a {{name}} de este círculo?",
       "backfillHours": "Rellenar horas",
-      "removeMember": "Eliminar miembro"
+      "removeMember": "Eliminar miembro",
+      "trackingStart": "Inicio de Seguimiento",
+      "editTrackingStart": "Editar fecha de inicio de seguimiento"
     },
     "reports": {
       "title": "Informes",
@@ -169,7 +202,8 @@
       "from": "Desde",
       "to": "Hasta",
       "generate": "Generar Informe",
-      "generating": "Generando..."
+      "generating": "Generando...",
+      "description": "Genera informes CSV de las horas registradas en un rango de fechas."
     },
     "reminders": {
       "title": "Recordatorios",
@@ -177,7 +211,10 @@
       "selectWeek": "Seleccionar Semana",
       "usersToRemind": "Usuarios a Recordar",
       "status": "Estado",
-      "noReminders": "No se necesitan recordatorios para esta semana"
+      "noReminders": "No se necesitan recordatorios para esta semana",
+      "phone": "Teléfono",
+      "name": "Nombre",
+      "hoursLogged": "Horas Registradas"
     },
     "backfill": {
       "title": "Rellenar Horas",
@@ -212,7 +249,9 @@
     "yes": "Sí",
     "no": "No",
     "actions": "Acciones",
-    "noData": "No hay datos disponibles"
+    "noData": "No hay datos disponibles",
+    "retry": "Reintentar",
+    "search": "Buscar"
   },
   "languages": {
     "en": "Inglés",

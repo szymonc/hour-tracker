@@ -13,6 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { TranslateModule } from '@ngx-translate/core';
 import { filter, map } from 'rxjs/operators';
 
 import { EntriesActions } from '../../store/entries/entries.actions';
@@ -37,6 +38,7 @@ import { entriesFeature } from '../../store/entries/entries.reducer';
     MatNativeDateModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    TranslateModule,
   ],
   template: `
     <div class="log-hours-container page-container">
@@ -44,38 +46,36 @@ import { entriesFeature } from '../../store/entries/entries.reducer';
         <mat-card-header>
           <mat-card-title>
             <mat-icon>add_circle</mat-icon>
-            Log Hours
+            {{ 'logHours.title' | translate }}
           </mat-card-title>
-          <mat-card-subtitle>Record your contribution hours for the week</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
           <form [formGroup]="entryForm" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Date</mat-label>
+              <mat-label>{{ 'logHours.date' | translate }}</mat-label>
               <input matInput [matDatepicker]="picker" formControlName="date" />
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
-              <mat-hint>Select any date in the target week</mat-hint>
               @if (entryForm.get('date')?.hasError('required')) {
-                <mat-error>Date is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Circle</mat-label>
+              <mat-label>{{ 'logHours.selectCircle' | translate }}</mat-label>
               <mat-select formControlName="circleId">
                 @for (circle of circles$ | async; track circle.circleId) {
                   <mat-option [value]="circle.circleId">{{ circle.circleName }}</mat-option>
                 }
               </mat-select>
               @if (entryForm.get('circleId')?.hasError('required')) {
-                <mat-error>Circle is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Hours</mat-label>
+              <mat-label>{{ 'logHours.hours' | translate }}</mat-label>
               <input
                 matInput
                 type="number"
@@ -83,49 +83,48 @@ import { entriesFeature } from '../../store/entries/entries.reducer';
                 min="0"
                 step="0.5"
               />
-              <mat-hint>Use decimals for partial hours (e.g., 1.5)</mat-hint>
               @if (entryForm.get('hours')?.hasError('required')) {
-                <mat-error>Hours is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (entryForm.get('hours')?.hasError('min')) {
-                <mat-error>Hours must be 0 or greater</mat-error>
+                <mat-error>{{ 'validation.min' | translate: {min: 0} }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field-full">
-              <mat-label>Description</mat-label>
+              <mat-label>{{ 'logHours.description' | translate }}</mat-label>
               <textarea
                 matInput
                 formControlName="description"
                 rows="3"
-                placeholder="What did you work on?"
+                [placeholder]="'logHours.descriptionPlaceholder' | translate"
               ></textarea>
               @if (entryForm.get('description')?.hasError('required')) {
-                <mat-error>Description is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (entryForm.get('description')?.hasError('maxlength')) {
-                <mat-error>Description must be less than 2000 characters</mat-error>
+                <mat-error>{{ 'validation.maxLength' | translate: {length: 2000} }}</mat-error>
               }
             </mat-form-field>
 
             @if (showReasonField) {
               <mat-form-field appearance="outline" class="form-field-full reason-field">
-                <mat-label>Reason for 0 hours</mat-label>
+                <mat-label>{{ 'logHours.zeroHoursReason' | translate }}</mat-label>
                 <textarea
                   matInput
                   formControlName="zeroHoursReason"
                   rows="2"
-                  placeholder="Why are you logging 0 hours this week?"
+                  [placeholder]="'logHours.zeroHoursReasonPlaceholder' | translate"
                 ></textarea>
-                <mat-hint>Required when logging 0 hours</mat-hint>
+                <mat-hint>{{ 'logHours.zeroHoursReasonRequired' | translate }}</mat-hint>
                 @if (entryForm.get('zeroHoursReason')?.hasError('required')) {
-                  <mat-error>Reason is required when logging 0 hours</mat-error>
+                  <mat-error>{{ 'logHours.zeroHoursReasonRequired' | translate }}</mat-error>
                 }
               </mat-form-field>
             }
 
             <div class="form-actions">
-              <button mat-button type="button" routerLink="/app/dashboard">Cancel</button>
+              <button mat-button type="button" routerLink="/app/dashboard">{{ 'common.cancel' | translate }}</button>
               <button
                 mat-raised-button
                 color="primary"
@@ -135,7 +134,7 @@ import { entriesFeature } from '../../store/entries/entries.reducer';
                 @if (isLoading$ | async) {
                   <mat-spinner diameter="20"></mat-spinner>
                 } @else {
-                  Log Hours
+                  {{ 'logHours.submit' | translate }}
                 }
               </button>
             </div>

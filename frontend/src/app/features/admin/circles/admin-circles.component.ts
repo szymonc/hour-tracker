@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AdminActions } from '../../../store/admin/admin.actions';
 import {
@@ -23,31 +24,31 @@ import {
 @Component({
   selector: 'app-circles-table',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, RouterLink],
+  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, RouterLink, TranslateModule],
   template: `
     <table mat-table [dataSource]="dataSource">
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'admin.circles.name' | translate }}</th>
         <td mat-cell *matCellDef="let c">{{ c.name }}</td>
       </ng-container>
       <ng-container matColumnDef="isActive">
-        <th mat-header-cell *matHeaderCellDef>Active</th>
-        <td mat-cell *matCellDef="let c">{{ c.isActive !== false ? 'Yes' : 'No' }}</td>
+        <th mat-header-cell *matHeaderCellDef>{{ 'admin.circles.status' | translate }}</th>
+        <td mat-cell *matCellDef="let c">{{ c.isActive !== false ? ('admin.circles.active' | translate) : ('admin.circles.inactive' | translate) }}</td>
       </ng-container>
       <ng-container matColumnDef="memberCount">
-        <th mat-header-cell *matHeaderCellDef>Members</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'admin.circles.members' | translate }}</th>
         <td mat-cell *matCellDef="let c">{{ c.memberCount }}</td>
       </ng-container>
       <ng-container matColumnDef="totalHoursThisMonth">
-        <th mat-header-cell *matHeaderCellDef>Hours (Month)</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'admin.circles.totalHours' | translate }}</th>
         <td mat-cell *matCellDef="let c">{{ c.totalHoursThisMonth }}h</td>
       </ng-container>
       <ng-container matColumnDef="avgHoursPerMember">
-        <th mat-header-cell *matHeaderCellDef>Avg/Member</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'admin.circles.avgHours' | translate }}</th>
         <td mat-cell *matCellDef="let c">{{ c.avgHoursPerMember }}h</td>
       </ng-container>
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
         <td mat-cell *matCellDef="let c">
           <a
             mat-icon-button
@@ -71,7 +72,7 @@ import {
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" [attr.colspan]="displayedColumns.length">No circles yet. Add one above.</td>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">{{ 'admin.circles.noCircles' | translate }}</td>
       </tr>
     </table>
   `,
@@ -107,37 +108,38 @@ export class CirclesTableComponent implements OnChanges {
     MatFormFieldModule,
     MatInputModule,
     CirclesTableComponent,
+    TranslateModule,
   ],
   template: `
     <div class="admin-circles page-container">
-      <h1>Circles</h1>
+      <h1>{{ 'admin.circles.title' | translate }}</h1>
 
       <!-- Add circle form -->
       <mat-card class="add-card">
         <mat-card-header>
-          <mat-card-title>Add circle</mat-card-title>
+          <mat-card-title>{{ 'admin.circles.createNew' | translate }}</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <form class="add-form" (ngSubmit)="onAddCircle()">
             <mat-form-field appearance="outline" class="field-name">
-              <mat-label>Name</mat-label>
+              <mat-label>{{ 'admin.circles.name' | translate }}</mat-label>
               <input
                 matInput
                 [(ngModel)]="newName"
                 name="newName"
                 required
                 maxlength="255"
-                placeholder="Circle name"
+                [placeholder]="'admin.circles.name' | translate"
                 [disabled]="(actionLoading$ | async) ?? false"
               />
             </mat-form-field>
             <mat-form-field appearance="outline" class="field-desc">
-              <mat-label>Description (optional)</mat-label>
+              <mat-label>{{ 'admin.circles.description' | translate }}</mat-label>
               <input
                 matInput
                 [(ngModel)]="newDescription"
                 name="newDescription"
-                placeholder="Short description"
+                [placeholder]="'admin.circles.descriptionPlaceholder' | translate"
                 [disabled]="(actionLoading$ | async) ?? false"
               />
             </mat-form-field>
@@ -150,7 +152,7 @@ export class CirclesTableComponent implements OnChanges {
               @if (actionLoading$ | async) {
                 <mat-spinner diameter="20"></mat-spinner>
               } @else {
-                <mat-icon>add</mat-icon> Add circle
+                <mat-icon>add</mat-icon> {{ 'admin.circles.create' | translate }}
               }
             </button>
           </form>

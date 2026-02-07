@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { CreateCircleDto } from './dto/create-circle.dto';
 import { AdminCreateEntryDto } from './dto/admin-create-entry.dto';
+import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { User, UserRole } from '../users/entities/user.entity';
 import { Circle } from '../circles/entities/circle.entity';
 import { CircleMembership } from '../circles/entities/circle-membership.entity';
@@ -378,7 +379,14 @@ export class AdminService {
   }
 
   async getCircleMembers(circleId: string): Promise<
-    Array<{ id: string; userId: string; userName: string; userEmail: string; joinedAt: string }>
+    Array<{
+      id: string;
+      userId: string;
+      userName: string;
+      userEmail: string;
+      joinedAt: string;
+      trackingStartDate: string;
+    }>
   > {
     const circle = await this.circlesRepository.findOne({ where: { id: circleId } });
     if (!circle) {
@@ -395,6 +403,7 @@ export class AdminService {
       userName: m.user.name,
       userEmail: m.user.email,
       joinedAt: m.joinedAt.toISOString(),
+      trackingStartDate: (m.trackingStartDate ?? m.joinedAt).toISOString(),
     }));
   }
 
@@ -533,5 +542,70 @@ export class AdminService {
         id: m.circle.id,
         name: m.circle.name,
       }));
+  }
+
+  async updateMembership(
+    circleId: string,
+    userId: string,
+    dto: UpdateMembershipDto,
+  ): Promise<CircleMembership> {
+    const membership = await this.membershipsRepository.findOne({
+      where: { circleId, userId },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('Membership not found');
+    }
+
+    if (dto.trackingStartDate !== undefined) {
+      membership.trackingStartDate = dto.trackingStartDate
+        ? new Date(dto.trackingStartDate)
+        : null;
+    }
+
+    return this.membershipsRepository.save(membership);
+  }
+
+  async getPendingUsers(): Promise<
+    Array<{
+      id: string;
+      email: string;
+      name: string;
+      createdAt: Date;
+    }>
+  > {
+    const users = await this.usersRepository.find({
+      where: { isApproved: false, isActive: true, role: UserRole.USER },
+      order: { createdAt: 'DESC' },
+    });
+
+    return users.map((user) => ({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+    }));
+  }
+
+  async approveUser(userId: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.isApproved = true;
+    return this.usersRepository.save(user);
+  }
+
+  async declineUser(userId: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Hard delete the user since they were never approved
+    await this.usersRepository.remove(user);
   }
 }

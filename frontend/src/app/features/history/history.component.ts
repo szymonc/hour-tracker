@@ -6,6 +6,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { EntriesActions } from '../../store/entries/entries.actions';
 import { selectAllEntries, entriesFeature } from '../../store/entries/entries.reducer';
@@ -20,10 +21,11 @@ import { selectAllEntries, entriesFeature } from '../../store/entries/entries.re
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    TranslateModule,
   ],
   template: `
     <div class="history-container page-container">
-      <h1>Entry History</h1>
+      <h1>{{ 'history.title' | translate }}</h1>
 
       <mat-card>
         @if (isLoading$ | async) {
@@ -33,22 +35,22 @@ import { selectAllEntries, entriesFeature } from '../../store/entries/entries.re
         } @else {
           <table mat-table [dataSource]="(entries$ | async) ?? []" class="entries-table">
             <ng-container matColumnDef="weekStartDate">
-              <th mat-header-cell *matHeaderCellDef>Week</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'history.week' | translate }}</th>
               <td mat-cell *matCellDef="let entry">{{ formatDate(entry.weekStartDate) }}</td>
             </ng-container>
 
             <ng-container matColumnDef="circleName">
-              <th mat-header-cell *matHeaderCellDef>Circle</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'history.circle' | translate }}</th>
               <td mat-cell *matCellDef="let entry">{{ entry.circleName }}</td>
             </ng-container>
 
             <ng-container matColumnDef="hours">
-              <th mat-header-cell *matHeaderCellDef>Hours</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'history.hours' | translate }}</th>
               <td mat-cell *matCellDef="let entry">{{ entry.hours }}h</td>
             </ng-container>
 
             <ng-container matColumnDef="description">
-              <th mat-header-cell *matHeaderCellDef>Description</th>
+              <th mat-header-cell *matHeaderCellDef>{{ 'history.description' | translate }}</th>
               <td mat-cell *matCellDef="let entry" class="description-cell">
                 {{ entry.description | slice:0:50 }}{{ entry.description.length > 50 ? '...' : '' }}
               </td>
@@ -61,8 +63,7 @@ import { selectAllEntries, entriesFeature } from '../../store/entries/entries.re
           @if ((entries$ | async)?.length === 0) {
             <div class="empty-state">
               <mat-icon>history</mat-icon>
-              <h3>No entries yet</h3>
-              <p>Start logging hours to see your history here</p>
+              <h3>{{ 'history.noEntries' | translate }}</h3>
             </div>
           }
 
@@ -104,6 +105,7 @@ import { selectAllEntries, entriesFeature } from '../../store/entries/entries.re
 })
 export class HistoryComponent implements OnInit {
   private store = inject(Store);
+  private translate = inject(TranslateService);
 
   entries$ = this.store.select(selectAllEntries);
   isLoading$ = this.store.select(entriesFeature.selectIsLoading);
@@ -116,7 +118,8 @@ export class HistoryComponent implements OnInit {
   }
 
   formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    const lang = this.translate.currentLang || 'en';
+    return new Date(dateStr).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',

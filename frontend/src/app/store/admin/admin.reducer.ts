@@ -1,6 +1,13 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { AdminActions } from './admin.actions';
 
+export interface PendingUser {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface AdminDashboard {
   recentEntries: any[];
   missingPreviousWeek: { weekStartDate: string; users: any[]; count: number };
@@ -12,6 +19,9 @@ export interface AdminDashboard {
 export interface AdminState {
   dashboard: AdminDashboard | null;
   dashboardLoading: boolean;
+  pendingUsers: PendingUser[];
+  pendingUsersLoading: boolean;
+  pendingActionLoading: boolean;
   users: any[];
   usersLoading: boolean;
   usersPagination: { page: number; pageSize: number; totalItems: number; totalPages: number };
@@ -30,6 +40,9 @@ export interface AdminState {
 const initialState: AdminState = {
   dashboard: null,
   dashboardLoading: false,
+  pendingUsers: [],
+  pendingUsersLoading: false,
+  pendingActionLoading: false,
   users: [],
   usersLoading: false,
   usersPagination: { page: 1, pageSize: 20, totalItems: 0, totalPages: 0 },
@@ -62,6 +75,42 @@ export const adminFeature = createFeature({
     on(AdminActions.loadDashboardFailure, (state, { error }) => ({
       ...state,
       dashboardLoading: false,
+      error,
+    })),
+    // Pending Users
+    on(AdminActions.loadPendingUsers, (state) => ({
+      ...state,
+      pendingUsersLoading: true,
+      error: null,
+    })),
+    on(AdminActions.loadPendingUsersSuccess, (state, { users }) => ({
+      ...state,
+      pendingUsers: users,
+      pendingUsersLoading: false,
+    })),
+    on(AdminActions.loadPendingUsersFailure, (state, { error }) => ({
+      ...state,
+      pendingUsersLoading: false,
+      error,
+    })),
+    on(AdminActions.approveUser, AdminActions.declineUser, (state) => ({
+      ...state,
+      pendingActionLoading: true,
+      error: null,
+    })),
+    on(AdminActions.approveUserSuccess, (state, { userId }) => ({
+      ...state,
+      pendingUsers: state.pendingUsers.filter(u => u.id !== userId),
+      pendingActionLoading: false,
+    })),
+    on(AdminActions.declineUserSuccess, (state, { userId }) => ({
+      ...state,
+      pendingUsers: state.pendingUsers.filter(u => u.id !== userId),
+      pendingActionLoading: false,
+    })),
+    on(AdminActions.approveUserFailure, AdminActions.declineUserFailure, (state, { error }) => ({
+      ...state,
+      pendingActionLoading: false,
       error,
     })),
     on(AdminActions.loadUsers, (state) => ({
@@ -161,6 +210,9 @@ export const {
   selectAdminState,
   selectDashboard,
   selectDashboardLoading,
+  selectPendingUsers,
+  selectPendingUsersLoading,
+  selectPendingActionLoading,
   selectUsers,
   selectUsersLoading,
   selectUsersPagination,

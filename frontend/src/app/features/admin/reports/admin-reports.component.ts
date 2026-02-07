@@ -10,6 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AdminActions } from '../../../store/admin/admin.actions';
 import { selectReportGenerating } from '../../../store/admin/admin.reducer';
@@ -28,29 +29,30 @@ import { selectReportGenerating } from '../../../store/admin/admin.reducer';
     MatNativeDateModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    TranslateModule,
   ],
   template: `
     <div class="admin-reports page-container">
-      <h1>Reports</h1>
+      <h1>{{ 'admin.reports.title' | translate }}</h1>
 
       <mat-card>
         <mat-card-header>
-          <mat-card-title>Export CSV Report</mat-card-title>
-          <mat-card-subtitle>Download hours data for a date range</mat-card-subtitle>
+          <mat-card-title>{{ 'admin.reports.exportCsv' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'admin.reports.description' | translate }}</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
           <form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
             <div class="date-range">
               <mat-form-field appearance="outline">
-                <mat-label>From Date</mat-label>
+                <mat-label>{{ 'admin.reports.from' | translate }}</mat-label>
                 <input matInput [matDatepicker]="fromPicker" formControlName="from" data-testid="from-date" />
                 <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
                 <mat-datepicker #fromPicker></mat-datepicker>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>To Date</mat-label>
+                <mat-label>{{ 'admin.reports.to' | translate }}</mat-label>
                 <input matInput [matDatepicker]="toPicker" formControlName="to" data-testid="to-date" />
                 <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
                 <mat-datepicker #toPicker></mat-datepicker>
@@ -67,7 +69,7 @@ import { selectReportGenerating } from '../../../store/admin/admin.reducer';
               @if (isGenerating$ | async) {
                 <mat-spinner diameter="20"></mat-spinner>
               } @else {
-                <mat-icon>download</mat-icon> Download CSV
+                <mat-icon>download</mat-icon> {{ 'admin.reports.exportCsv' | translate }}
               }
             </button>
           </form>

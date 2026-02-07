@@ -15,6 +15,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { TranslateModule } from '@ngx-translate/core';
 import { Observable, Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil, filter, map, startWith } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -49,25 +50,26 @@ interface CircleOption {
     MatNativeDateModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    TranslateModule,
   ],
   template: `
     <div class="backfill-container">
       <mat-card>
         <mat-card-header>
           <mat-icon mat-card-avatar>history</mat-icon>
-          <mat-card-title>Backfill Hours</mat-card-title>
-          <mat-card-subtitle>Create an entry on behalf of a user</mat-card-subtitle>
+          <mat-card-title>{{ 'admin.backfill.title' | translate }}</mat-card-title>
+          <mat-card-subtitle>{{ 'admin.backfill.subtitle' | translate }}</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Search User</mat-label>
+              <mat-label>{{ 'admin.backfill.searchUser' | translate }}</mat-label>
               <input
                 matInput
                 formControlName="userSearch"
                 [matAutocomplete]="userAuto"
-                placeholder="Type to search users..."
+                [placeholder]="'admin.backfill.searchPlaceholder' | translate"
               />
               <mat-autocomplete
                 #userAuto="matAutocomplete"
@@ -81,7 +83,7 @@ interface CircleOption {
                 }
               </mat-autocomplete>
               @if (form.get('userSearch')?.hasError('required') && form.get('userSearch')?.touched) {
-                <mat-error>User is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
@@ -96,77 +98,77 @@ interface CircleOption {
             }
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Circle</mat-label>
+              <mat-label>{{ 'admin.backfill.selectCircle' | translate }}</mat-label>
               <mat-select formControlName="circleId">
                 @for (circle of userCircles; track circle.id) {
                   <mat-option [value]="circle.id">{{ circle.name }}</mat-option>
                 }
               </mat-select>
               @if (form.get('circleId')?.hasError('required') && form.get('circleId')?.touched) {
-                <mat-error>Circle is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (!selectedUser) {
-                <mat-hint>Select a user first to see their circles</mat-hint>
+                <mat-hint>{{ 'admin.backfill.selectUserFirst' | translate }}</mat-hint>
               }
               @if (selectedUser && userCircles.length === 0) {
-                <mat-hint class="warn">This user is not a member of any circle</mat-hint>
+                <mat-hint class="warn">{{ 'admin.backfill.noCircles' | translate }}</mat-hint>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Date</mat-label>
+              <mat-label>{{ 'admin.backfill.date' | translate }}</mat-label>
               <input matInput [matDatepicker]="picker" formControlName="date" />
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
               @if (form.get('date')?.hasError('required') && form.get('date')?.touched) {
-                <mat-error>Date is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Hours</mat-label>
+              <mat-label>{{ 'admin.backfill.hours' | translate }}</mat-label>
               <input matInput type="number" formControlName="hours" min="0" max="99.99" step="0.25" />
               @if (form.get('hours')?.hasError('required') && form.get('hours')?.touched) {
-                <mat-error>Hours is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (form.get('hours')?.hasError('min')) {
-                <mat-error>Hours must be 0 or greater</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (form.get('hours')?.hasError('max')) {
-                <mat-error>Hours cannot exceed 99.99</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
+              <mat-label>{{ 'admin.backfill.description' | translate }}</mat-label>
               <textarea
                 matInput
                 formControlName="description"
                 rows="3"
-                placeholder="What was done..."
+                [placeholder]="'admin.backfill.descriptionPlaceholder' | translate"
               ></textarea>
               @if (form.get('description')?.hasError('required') && form.get('description')?.touched) {
-                <mat-error>Description is required</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (form.get('description')?.hasError('minlength')) {
-                <mat-error>Description must be at least 1 character</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
               @if (form.get('description')?.hasError('maxlength')) {
-                <mat-error>Description cannot exceed 2000 characters</mat-error>
+                <mat-error>{{ 'validation.required' | translate }}</mat-error>
               }
             </mat-form-field>
 
             @if (form.get('hours')?.value === 0) {
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Reason for Zero Hours</mat-label>
+                <mat-label>{{ 'admin.backfill.zeroHoursReason' | translate }}</mat-label>
                 <textarea
                   matInput
                   formControlName="zeroHoursReason"
                   rows="2"
-                  placeholder="Why no hours this week..."
+                  [placeholder]="'admin.backfill.zeroHoursReasonPlaceholder' | translate"
                 ></textarea>
                 @if (form.get('zeroHoursReason')?.hasError('required') && form.get('zeroHoursReason')?.touched) {
-                  <mat-error>Reason is required when logging 0 hours</mat-error>
+                  <mat-error>{{ 'validation.required' | translate }}</mat-error>
                 }
               </mat-form-field>
             }
@@ -182,7 +184,7 @@ interface CircleOption {
                   <mat-spinner diameter="20"></mat-spinner>
                 } @else {
                   <mat-icon>add</mat-icon>
-                  Create Entry
+                  {{ 'admin.backfill.createEntry' | translate }}
                 }
               </button>
             </div>

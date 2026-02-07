@@ -40,10 +40,21 @@ export const selectUserPhone = createSelector(
 export const selectCanAccessApp = createSelector(
   selectIsAuthenticated,
   selectUser,
-  (isAuth, user) => isAuth && user?.phoneNumber !== null
+  (isAuth, user) => isAuth && user?.phoneNumber !== null && user?.isApproved === true
 );
 
 export const selectUserRole = createSelector(
   selectUser,
   (user) => user?.role ?? 'user'
+);
+
+export const selectIsPendingApproval = createSelector(
+  selectIsAuthenticated,
+  selectUser,
+  (isAuth, user) => isAuth && user?.isApproved === false && user?.role !== 'admin'
+);
+
+export const selectIsApproved = createSelector(
+  selectUser,
+  (user) => user?.isApproved ?? false
 );
