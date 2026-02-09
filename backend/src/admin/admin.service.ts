@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository, In } from 'typeorm';
 import { CreateCircleDto } from './dto/create-circle.dto';
 import { AdminCreateEntryDto } from './dto/admin-create-entry.dto';
@@ -10,12 +11,15 @@ import { CircleMembership } from '../circles/entities/circle-membership.entity';
 import { WeeklyEntry } from '../entries/entities/weekly-entry.entity';
 import { WeeklyStatus, EntriesService } from '../entries/entries.service';
 import { DateUtils } from '../common/utils/date.utils';
+import { AuthService } from '../auth/auth.service';
+import { TelegramService } from '../telegram/telegram.service';
 
 export interface MissingUser {
   id: string;
   name: string;
   email: string;
   phoneNumber: string | null;
+  telegramChatId: string | null;
   totalHours: number;
   status: WeeklyStatus;
 }
@@ -63,6 +67,9 @@ export class AdminService {
     private readonly entriesRepository: Repository<WeeklyEntry>,
     private readonly dateUtils: DateUtils,
     private readonly entriesService: EntriesService,
+    private readonly authService: AuthService,
+    private readonly telegramService: TelegramService,
+    private readonly configService: ConfigService,
   ) {}
 
   async getDashboard(): Promise<AdminDashboard> {
@@ -111,6 +118,7 @@ export class AdminService {
           name: user.name,
           email: user.email,
           phoneNumber: user.phoneNumber,
+          telegramChatId: user.telegramChatId,
           totalHours: 0,
           status: WeeklyStatus.MISSING,
         });
@@ -124,6 +132,7 @@ export class AdminService {
             name: user.name,
             email: user.email,
             phoneNumber: user.phoneNumber,
+            telegramChatId: user.telegramChatId,
             totalHours: 0,
             status: WeeklyStatus.MISSING,
           });
@@ -135,6 +144,7 @@ export class AdminService {
           name: user.name,
           email: user.email,
           phoneNumber: user.phoneNumber,
+          telegramChatId: user.telegramChatId,
           totalHours: data.totalHours,
           status: WeeklyStatus.UNDER_TARGET,
         });
@@ -168,6 +178,7 @@ export class AdminService {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
+        telegramChatId: user.telegramChatId,
         totalHours: 0,
         status: WeeklyStatus.MISSING,
         consecutiveMissingWeeks: 2,
@@ -607,5 +618,27 @@ export class AdminService {
 
     // Hard delete the user since they were never approved
     await this.usersRepository.remove(user);
+  }
+
+  async sendTelegramReminder(userId: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.telegramChatId) {
+      throw new BadRequestException('User has not connected Telegram');
+    }
+
+    const token = await this.authService.createOneTimeToken(userId);
+    const backendUrl = this.configService.get<string>('BACKEND_URL', 'http://localhost:3000');
+    const loginUrl = `${backendUrl}/api/v1/auth/one-time/${token}`;
+
+    await this.telegramService.sendReminder(user.telegramChatId, user.name, loginUrl);
+  }
+
+  getTelegramBotUsername(): string | null {
+    return this.telegramService.getBotUsername();
   }
 }

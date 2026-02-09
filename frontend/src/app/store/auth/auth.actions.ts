@@ -16,8 +16,8 @@ export const AuthActions = createActionGroup({
 
     // Google OAuth
     'Google Login': emptyProps(),
-    'Google Login Callback': props<{ token: string }>(),
-    'Google Login Success': props<{ user: User; accessToken: string }>(),
+    'Google Login Callback': props<{ token: string; redirect?: string | null }>(),
+    'Google Login Success': props<{ user: User; accessToken: string; redirect?: string | null }>(),
     'Google Login Failure': props<{ error: string }>(),
 
     // Token refresh

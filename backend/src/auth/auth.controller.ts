@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Param,
   Body,
   Req,
   Res,
@@ -143,6 +144,29 @@ export class AuthController {
     return { message: 'Logged out successfully' };
   }
 
+  @Get('one-time/:token')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @ApiOperation({ summary: 'Login with one-time token (from Telegram reminder)' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend with access token' })
+  @ApiResponse({ status: 302, description: 'Redirects to login on invalid token' })
+  async oneTimeLogin(
+    @Param('token') token: string,
+    @Res() response: Response,
+  ) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const user = await this.authService.validateOneTimeToken(token);
+
+    if (!user) {
+      return response.redirect(`${frontendUrl}/auth/callback?error=invalid_token`);
+    }
+
+    const accessToken = this.authService.generateAccessToken(user);
+    const refreshToken = this.authService.generateRefreshToken(user);
+
+    response.cookie('refresh_token', refreshToken, this.cookieOptions);
+    response.redirect(`${frontendUrl}/auth/callback?token=${accessToken}&redirect=/app/log-hours`);
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -160,6 +184,7 @@ export class AuthController {
       role: user.role,
       authProvider: user.authProvider,
       phoneNumber: user.phoneNumber,
+      telegramChatId: user.telegramChatId || null,
       isActive: user.isActive,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

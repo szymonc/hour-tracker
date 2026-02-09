@@ -7,6 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AdminActions } from '../../../store/admin/admin.actions';
@@ -16,6 +18,7 @@ import {
   selectPendingUsers,
   selectPendingUsersLoading,
   selectPendingActionLoading,
+  selectTelegramSending,
 } from '../../../store/admin/admin.reducer';
 
 @Component({
@@ -29,6 +32,8 @@ import {
     MatIconModule,
     MatTableModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatSnackBarModule,
     TranslateModule,
   ],
   template: `
@@ -113,9 +118,21 @@ import {
               @for (user of dashboard.missingPreviousWeek.users.slice(0, 5); track user.id) {
                 <div class="user-row">
                   <span>{{ user.name }}</span>
-                  <span class="status-badge" [class]="'status-' + user.status">
-                    {{ user.status === 'missing' ? ('admin.dashboard.missing' | translate) : user.totalHours + 'h' }}
-                  </span>
+                  <div class="user-row-actions">
+                    <span class="status-badge" [class]="'status-' + user.status">
+                      {{ user.status === 'missing' ? ('admin.dashboard.missing' | translate) : user.totalHours + 'h' }}
+                    </span>
+                    @if (user.telegramChatId) {
+                      <button
+                        mat-icon-button
+                        color="primary"
+                        (click)="sendTelegramReminder(user.id); $event.stopPropagation()"
+                        [disabled]="(telegramSending$ | async) === user.id"
+                        [matTooltip]="'admin.dashboard.sendTelegramReminder' | translate">
+                        <mat-icon>send</mat-icon>
+                      </button>
+                    }
+                  </div>
                 </div>
               }
               @if (dashboard.missingPreviousWeek.count > 5) {
@@ -312,6 +329,12 @@ import {
       }
     }
 
+    .user-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .user-row, .entry-row {
       display: flex;
       align-items: center;
@@ -395,6 +418,7 @@ export class AdminDashboardComponent implements OnInit {
   pendingUsers$ = this.store.select(selectPendingUsers);
   pendingUsersLoading$ = this.store.select(selectPendingUsersLoading);
   pendingActionLoading$ = this.store.select(selectPendingActionLoading);
+  telegramSending$ = this.store.select(selectTelegramSending);
 
   ngOnInit(): void {
     this.store.dispatch(AdminActions.loadDashboard());
@@ -409,5 +433,9 @@ export class AdminDashboardComponent implements OnInit {
     if (confirm('Are you sure you want to decline this user? This will delete their account.')) {
       this.store.dispatch(AdminActions.declineUser({ userId }));
     }
+  }
+
+  sendTelegramReminder(userId: string): void {
+    this.store.dispatch(AdminActions.sendTelegramReminder({ userId }));
   }
 }

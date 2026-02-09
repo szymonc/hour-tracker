@@ -117,7 +117,11 @@
     "updateSuccess": "Perfil actualizado exitosamente",
     "updateFailed": "Error al actualizar perfil",
     "language": "Idioma",
-    "selectLanguage": "Seleccionar Idioma"
+    "selectLanguage": "Seleccionar Idioma",
+    "telegramConnected": "Telegram conectado",
+    "telegramInstructions": "Conecta tu cuenta de Telegram para recibir recordatorios de horas.",
+    "connectTelegram": "Conectar Telegram",
+    "telegramNotConfigured": "El bot de Telegram no está configurado. Contacta a tu administrador."
   },
   "firstTimeProfile": {
     "title": "Completa Tu Perfil",
@@ -147,7 +151,8 @@
       "registeredAt": "Registrado",
       "approve": "Aprobar",
       "decline": "Rechazar",
-      "noPendingApprovals": "No hay usuarios pendientes de aprobación"
+      "noPendingApprovals": "No hay usuarios pendientes de aprobación",
+      "sendTelegramReminder": "Enviar recordatorio por Telegram"
     },
     "users": {
       "title": "Usuarios",

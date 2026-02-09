@@ -9,8 +9,10 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 
 import { User, UserRole, AuthProvider } from '../users/entities/user.entity';
+import { OneTimeToken } from './entities/one-time-token.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -31,6 +33,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(OneTimeToken)
+    private readonly oneTimeTokenRepository: Repository<OneTimeToken>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -186,6 +190,48 @@ export class AuthService {
 
   async getUserById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
+  }
+
+  async createOneTimeToken(userId: string): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    const oneTimeToken = this.oneTimeTokenRepository.create({
+      token,
+      userId,
+      expiresAt,
+    });
+
+    await this.oneTimeTokenRepository.save(oneTimeToken);
+    return token;
+  }
+
+  async validateOneTimeToken(token: string): Promise<User | null> {
+    // Atomic update: only marks as used if not already used and not expired
+    const result = await this.oneTimeTokenRepository
+      .createQueryBuilder()
+      .update(OneTimeToken)
+      .set({ used: true, usedAt: new Date() })
+      .where('token = :token AND used = false AND "expiresAt" > :now', {
+        token,
+        now: new Date(),
+      })
+      .execute();
+
+    if (result.affected === 0) {
+      return null;
+    }
+
+    const oneTimeToken = await this.oneTimeTokenRepository.findOne({
+      where: { token },
+      relations: ['user'],
+    });
+
+    if (!oneTimeToken?.user || !oneTimeToken.user.isActive) {
+      return null;
+    }
+
+    return oneTimeToken.user;
   }
 
   private isPasswordStrong(password: string): boolean {

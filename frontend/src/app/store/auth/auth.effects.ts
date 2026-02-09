@@ -53,12 +53,13 @@ export class AuthEffects {
   googleLoginCallback$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.googleLoginCallback),
-      exhaustMap(({ token }) =>
+      exhaustMap(({ token, redirect }) =>
         this.authService.processGoogleCallback(token).pipe(
           map((response) =>
             AuthActions.googleLoginSuccess({
               user: response.user,
               accessToken: response.accessToken,
+              redirect,
             })
           ),
           catchError((error) =>
@@ -77,14 +78,21 @@ export class AuthEffects {
           AuthActions.registerSuccess,
           AuthActions.googleLoginSuccess
         ),
-        tap(({ user, accessToken }) => {
+        tap((action) => {
           // Store token
-          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('accessToken', action.accessToken);
+
+          // Check for redirect from one-time login (validate against allowed paths)
+          const redirect = 'redirect' in action ? action.redirect : null;
+          const allowedRedirects = ['/app/log-hours', '/app/dashboard', '/app/history', '/app/profile'];
+          const safeRedirect = redirect && allowedRedirects.includes(redirect) ? redirect : null;
 
           // Navigate based on profile completion and role
-          if (!user.phoneNumber) {
+          if (!action.user.phoneNumber) {
             this.router.navigate(['/profile/first-time']);
-          } else if (user.role === 'admin') {
+          } else if (safeRedirect) {
+            this.router.navigate([safeRedirect]);
+          } else if (action.user.role === 'admin') {
             this.router.navigate(['/admin/dashboard']);
           } else {
             this.router.navigate(['/app/dashboard']);

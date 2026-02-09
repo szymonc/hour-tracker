@@ -28,6 +28,11 @@ export const AdminActions = createActionGroup({
     'Update User Phone Success': props<{ user: any }>(),
     'Update User Phone Failure': props<{ error: string }>(),
 
+    // Telegram Reminders
+    'Send Telegram Reminder': props<{ userId: string }>(),
+    'Send Telegram Reminder Success': props<{ userId: string }>(),
+    'Send Telegram Reminder Failure': props<{ error: string }>(),
+
     // Circles
     'Load Circles': emptyProps(),
     'Load Circles Success': props<{ circles: any[] }>(),

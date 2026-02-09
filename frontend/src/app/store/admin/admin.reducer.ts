@@ -34,6 +34,7 @@ export interface AdminState {
   reportGenerating: boolean;
   backfillStatus: 'idle' | 'loading' | 'success' | 'error';
   backfillError: string | null;
+  telegramSending: string | null; // userId being sent, or null
   error: string | null;
 }
 
@@ -55,6 +56,7 @@ const initialState: AdminState = {
   reportGenerating: false,
   backfillStatus: 'idle',
   backfillError: null,
+  telegramSending: null,
   error: null,
 };
 
@@ -202,7 +204,22 @@ export const adminFeature = createFeature({
       ...state,
       backfillStatus: 'idle' as const,
       backfillError: null,
-    }))
+    })),
+    // Telegram Reminders
+    on(AdminActions.sendTelegramReminder, (state, { userId }) => ({
+      ...state,
+      telegramSending: userId,
+      error: null,
+    })),
+    on(AdminActions.sendTelegramReminderSuccess, (state) => ({
+      ...state,
+      telegramSending: null,
+    })),
+    on(AdminActions.sendTelegramReminderFailure, (state, { error }) => ({
+      ...state,
+      telegramSending: null,
+      error,
+    })),
   ),
 });
 
@@ -225,5 +242,6 @@ export const {
   selectReportGenerating,
   selectBackfillStatus,
   selectBackfillError,
+  selectTelegramSending,
   selectError,
 } = adminFeature;

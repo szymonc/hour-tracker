@@ -62,6 +62,10 @@ export class User {
   @Column({ default: false })
   phoneVerified: boolean;
 
+  @Column({ nullable: true, length: 64 })
+  @Index()
+  telegramChatId: string;
+
   @Column({ default: true })
   isActive: boolean;
 
