@@ -91,6 +91,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent),
       },
       {
+        path: 'users/:id',
+        loadComponent: () => import('./features/admin/users/admin-user-detail.component').then(m => m.AdminUserDetailComponent),
+      },
+      {
         path: 'circles',
         loadComponent: () => import('./features/admin/circles/admin-circles.component').then(m => m.AdminCirclesComponent),
       },

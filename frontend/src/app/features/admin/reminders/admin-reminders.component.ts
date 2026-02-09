@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -16,6 +17,7 @@ import { selectReminderTargets, selectRemindersLoading, selectSelectedWeek } fro
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     MatCardModule,
     MatTableModule,
     MatProgressSpinnerModule,
@@ -40,7 +42,9 @@ import { selectReminderTargets, selectRemindersLoading, selectSelectedWeek } fro
             <table mat-table [dataSource]="(targets$ | async) ?? []">
               <ng-container matColumnDef="userName">
                 <th mat-header-cell *matHeaderCellDef>{{ 'admin.reminders.name' | translate }}</th>
-                <td mat-cell *matCellDef="let t">{{ t.userName }}</td>
+                <td mat-cell *matCellDef="let t">
+                  <a class="user-link" [routerLink]="['/admin/users', t.userId]">{{ t.userName }}</a>
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="userEmail">
@@ -81,6 +85,8 @@ import { selectReminderTargets, selectRemindersLoading, selectSelectedWeek } fro
     .admin-reminders { max-width: 1000px; margin: 0 auto; }
     table { width: 100%; }
     .loading-container { display: flex; justify-content: center; padding: 48px; }
+    .user-link { color: #1976d2; text-decoration: none; }
+    .user-link:hover { text-decoration: underline; }
   `],
 })
 export class AdminRemindersComponent implements OnInit {

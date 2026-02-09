@@ -27,6 +27,8 @@ import { CreateCircleDto } from './dto/create-circle.dto';
 import { AddCircleMemberDto } from './dto/add-circle-member.dto';
 import { AdminCreateEntryDto } from './dto/admin-create-entry.dto';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
+import { VoidEntryDto } from './dto/void-entry.dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -216,6 +218,20 @@ export class AdminController {
     };
   }
 
+  @Post('entries/:id/void')
+  @ApiOperation({ summary: 'Void an entry (soft delete with audit trail)' })
+  @ApiResponse({ status: 200, description: 'Entry voided' })
+  @ApiResponse({ status: 400, description: 'Entry already voided' })
+  @ApiResponse({ status: 404, description: 'Entry not found' })
+  async voidEntry(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: VoidEntryDto,
+    @CurrentUser('id') adminUserId: string,
+  ) {
+    await this.adminService.voidEntry(id, adminUserId, dto.reason);
+    return { success: true };
+  }
+
   @Get('users/:id/circles')
   @ApiOperation({ summary: 'Get circles a user is a member of' })
   @ApiResponse({ status: 200, description: 'User circles retrieved' })
@@ -231,6 +247,50 @@ export class AdminController {
   async getPendingUsers() {
     const users = await this.adminService.getPendingUsers();
     return { users };
+  }
+
+  @Get('users/:id/detail')
+  @ApiOperation({ summary: 'Get a single user profile with circles' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async getUser(@Param('id', ParseUUIDPipe) id: string) {
+    return this.adminService.getUser(id);
+  }
+
+  @Get('users/:id/entries')
+  @ApiOperation({ summary: 'Get paginated entries for a user (including voided)' })
+  @ApiQuery({ name: 'from', required: false })
+  @ApiQuery({ name: 'to', required: false })
+  @ApiQuery({ name: 'circleId', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiResponse({ status: 200, description: 'User entries retrieved' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async getUserEntries(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('circleId') circleId?: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ) {
+    const { entries, total } = await this.adminService.getUserEntries(id, {
+      from,
+      to,
+      circleId,
+      page: page || 1,
+      pageSize: Math.min(pageSize || 20, 100),
+    });
+
+    return {
+      entries,
+      pagination: {
+        page: page || 1,
+        pageSize: pageSize || 20,
+        totalItems: total,
+        totalPages: Math.ceil(total / (pageSize || 20)),
+      },
+    };
   }
 
   @Post('users/:id/approve')

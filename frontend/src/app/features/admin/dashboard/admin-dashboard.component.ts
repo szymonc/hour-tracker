@@ -53,7 +53,7 @@ import {
               @for (user of pendingUsers; track user.id) {
                 <div class="pending-user-row">
                   <div class="user-info">
-                    <span class="user-name">{{ user.name }}</span>
+                    <a class="user-name user-link" [routerLink]="['/admin/users', user.id]">{{ user.name }}</a>
                     <span class="user-email">{{ user.email }}</span>
                     <span class="user-date">{{ 'admin.dashboard.registeredAt' | translate }}: {{ user.createdAt | date:'short' }}</span>
                   </div>
@@ -117,7 +117,7 @@ import {
             <mat-card-content>
               @for (user of dashboard.missingPreviousWeek.users.slice(0, 5); track user.id) {
                 <div class="user-row">
-                  <span>{{ user.name }}</span>
+                  <a class="user-link" [routerLink]="['/admin/users', user.id]">{{ user.name }}</a>
                   <div class="user-row-actions">
                     <span class="status-badge" [class]="'status-' + user.status">
                       {{ user.status === 'missing' ? ('admin.dashboard.missing' | translate) : user.totalHours + 'h' }}
@@ -152,7 +152,7 @@ import {
             <mat-card-content>
               @for (user of dashboard.missingTwoWeeks.users.slice(0, 5); track user.id) {
                 <div class="user-row priority">
-                  <span>{{ user.name }}</span>
+                  <a class="user-link" [routerLink]="['/admin/users', user.id]">{{ user.name }}</a>
                   <span class="badge">{{ user.consecutiveMissingWeeks }} {{ 'dashboard.week' | translate }}s</span>
                 </div>
               }
@@ -170,7 +170,7 @@ import {
             <mat-card-content>
               @for (entry of dashboard.recentEntries.slice(0, 5); track entry.id) {
                 <div class="entry-row">
-                  <span class="user-name">{{ entry.userName }}</span>
+                  <a class="user-name user-link" [routerLink]="['/admin/users', entry.userId]">{{ entry.userName }}</a>
                   <span class="circle-name">{{ entry.circleName }}</span>
                   <span class="hours">{{ entry.hours }}h</span>
                 </div>
@@ -359,6 +359,12 @@ import {
       padding: 2px 8px;
       border-radius: 12px;
       font-size: 12px;
+    }
+
+    .user-link {
+      color: #1976d2;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
     }
 
     .entry-row {

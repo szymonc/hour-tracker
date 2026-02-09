@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { ReminderRun, ReminderRunStatus } from './entities/reminder-run.entity';
 import { ReminderTarget, WeeklyStatusEnum } from './entities/reminder-target.entity';
 import { User, UserRole } from '../users/entities/user.entity';
@@ -45,9 +45,9 @@ export class RemindersService {
       where: { isActive: true, role: UserRole.USER },
     });
 
-    // Get entries for target week
+    // Get entries for target week (exclude voided)
     const entries = await this.entriesRepository.find({
-      where: { weekStartDate: targetWeek },
+      where: { weekStartDate: targetWeek, voidedAt: IsNull() },
     });
 
     // Compute status for each user

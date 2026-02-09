@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Repository, In } from 'typeorm';
+import { Repository, In, IsNull } from 'typeorm';
 import { CreateCircleDto } from './dto/create-circle.dto';
 import { AdminCreateEntryDto } from './dto/admin-create-entry.dto';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
@@ -76,8 +76,9 @@ export class AdminService {
     const previousWeek = this.dateUtils.getPreviousWeekStart();
     const twoWeeksAgo = this.dateUtils.getLastNWeekStarts(3)[2]; // 2 weeks before current
 
-    // Get recent entries
+    // Get recent entries (exclude voided)
     const recentEntries = await this.entriesRepository.find({
+      where: { voidedAt: IsNull() },
       take: 10,
       order: { createdAt: 'DESC' },
       relations: ['user', 'circle'],
@@ -88,9 +89,9 @@ export class AdminService {
       where: { isActive: true, role: UserRole.USER },
     });
 
-    // Get entries for previous week
+    // Get entries for previous week (exclude voided)
     const previousWeekEntries = await this.entriesRepository.find({
-      where: { weekStartDate: previousWeek },
+      where: { weekStartDate: previousWeek, voidedAt: IsNull() },
     });
 
     // Calculate status for each user for previous week
@@ -153,9 +154,9 @@ export class AdminService {
       }
     });
 
-    // Find users missing for 2 consecutive weeks
+    // Find users missing for 2 consecutive weeks (exclude voided)
     const twoWeeksEntries = await this.entriesRepository.find({
-      where: { weekStartDate: In([previousWeek, twoWeeksAgo]) },
+      where: { weekStartDate: In([previousWeek, twoWeeksAgo]), voidedAt: IsNull() },
     });
 
     const userTwoWeekData = new Map<string, Set<string>>();
@@ -227,9 +228,9 @@ export class AdminService {
         where: { circleId: circle.id, isActive: true },
       });
 
-      // Get entries for this circle this week
+      // Get entries for this circle this week (exclude voided)
       const entries = await this.entriesRepository.find({
-        where: { circleId: circle.id, weekStartDate },
+        where: { circleId: circle.id, weekStartDate, voidedAt: IsNull() },
       });
 
       const totalHours = entries.reduce((sum, e) => sum + Number(e.hours), 0);
@@ -310,11 +311,12 @@ export class AdminService {
         where: { circleId: circle.id, isActive: true },
       });
 
-      // Get current month hours
+      // Get current month hours (exclude voided)
       const { start, end } = this.dateUtils.getMonthWeekRange(this.dateUtils.getCurrentMonth());
       const entries = await this.entriesRepository.find({
         where: {
           circleId: circle.id,
+          voidedAt: IsNull(),
         },
       });
 
@@ -640,5 +642,113 @@ export class AdminService {
 
   getTelegramBotUsername(): string | null {
     return this.telegramService.getBotUsername();
+  }
+
+  async getUser(userId: string): Promise<any> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const memberships = await this.membershipsRepository.find({
+      where: { userId, isActive: true },
+      relations: ['circle'],
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      phoneNumber: user.phoneNumber,
+      telegramChatId: user.telegramChatId,
+      isActive: user.isActive,
+      isApproved: user.isApproved,
+      createdAt: user.createdAt,
+      circles: memberships
+        .filter((m) => m.circle?.isActive)
+        .map((m) => ({ id: m.circle.id, name: m.circle.name })),
+    };
+  }
+
+  async getUserEntries(
+    userId: string,
+    filters: {
+      from?: string;
+      to?: string;
+      circleId?: string;
+      page?: number;
+      pageSize?: number;
+    },
+  ): Promise<{ entries: any[]; total: number }> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const qb = this.entriesRepository
+      .createQueryBuilder('entry')
+      .leftJoinAndSelect('entry.circle', 'circle')
+      .leftJoin('entry.voidedByUser', 'voidedByUser')
+      .addSelect(['voidedByUser.name'])
+      .where('entry.userId = :userId', { userId });
+
+    if (filters.from) {
+      qb.andWhere('entry.weekStartDate >= :from', { from: filters.from });
+    }
+    if (filters.to) {
+      qb.andWhere('entry.weekStartDate <= :to', { to: filters.to });
+    }
+    if (filters.circleId) {
+      qb.andWhere('entry.circleId = :circleId', { circleId: filters.circleId });
+    }
+
+    qb.orderBy('entry.createdAt', 'DESC');
+
+    const page = filters.page || 1;
+    const pageSize = Math.min(filters.pageSize || 20, 100);
+    const skip = (page - 1) * pageSize;
+
+    const [entries, total] = await qb.skip(skip).take(pageSize).getManyAndCount();
+
+    return {
+      entries: entries.map((e) => ({
+        id: e.id,
+        userId: e.userId,
+        circleId: e.circleId,
+        circleName: e.circle?.name,
+        weekStartDate: e.weekStartDate,
+        hours: Number(e.hours),
+        description: e.description,
+        zeroHoursReason: e.zeroHoursReason,
+        createdAt: e.createdAt,
+        voidedAt: e.voidedAt,
+        voidedBy: e.voidedBy,
+        voidedByName: e.voidedByUser?.name ?? null,
+        voidReason: e.voidReason,
+      })),
+      total,
+    };
+  }
+
+  async voidEntry(
+    entryId: string,
+    adminUserId: string,
+    reason: string,
+  ): Promise<void> {
+    const entry = await this.entriesRepository.findOne({ where: { id: entryId } });
+    if (!entry) {
+      throw new NotFoundException('Entry not found');
+    }
+    if (entry.voidedAt) {
+      throw new BadRequestException('Entry is already voided');
+    }
+
+    entry.voidedAt = new Date();
+    entry.voidedBy = adminUserId;
+    entry.voidReason = reason;
+    await this.entriesRepository.save(entry);
   }
 }

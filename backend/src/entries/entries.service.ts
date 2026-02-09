@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, IsNull } from 'typeorm';
 import { WeeklyEntry } from './entities/weekly-entry.entity';
 import { CircleMembership } from '../circles/entities/circle-membership.entity';
 import { CreateEntryDto } from './dto/create-entry.dto';
@@ -77,7 +77,8 @@ export class EntriesService {
     const queryBuilder = this.entriesRepository
       .createQueryBuilder('entry')
       .leftJoinAndSelect('entry.circle', 'circle')
-      .where('entry.userId = :userId', { userId });
+      .where('entry.userId = :userId', { userId })
+      .andWhere('entry.voidedAt IS NULL');
 
     if (filters.from) {
       queryBuilder.andWhere('entry.weekStartDate >= :from', { from: filters.from });
@@ -112,7 +113,7 @@ export class EntriesService {
 
     for (const weekStartDate of weekStarts) {
       const entries = await this.entriesRepository.find({
-        where: { userId, weekStartDate },
+        where: { userId, weekStartDate, voidedAt: IsNull() },
         relations: ['circle'],
       });
 
@@ -158,6 +159,7 @@ export class EntriesService {
       where: {
         userId,
         weekStartDate: Between(start, end),
+        voidedAt: IsNull(),
       },
       relations: ['circle'],
     });
@@ -217,7 +219,7 @@ export class EntriesService {
 
   async getWeeklyStatusForUser(userId: string, weekStartDate: string): Promise<WeeklyStatus> {
     const entries = await this.entriesRepository.find({
-      where: { userId, weekStartDate },
+      where: { userId, weekStartDate, voidedAt: IsNull() },
     });
 
     const totalHours = entries.reduce((sum, e) => sum + Number(e.hours), 0);

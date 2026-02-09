@@ -43,6 +43,16 @@ export class WeeklyEntry {
   @Index()
   createdAt: Date;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  @Index()
+  voidedAt: Date | null;
+
+  @Column({ type: 'uuid', nullable: true })
+  voidedBy: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  voidReason: string | null;
+
   @ManyToOne(() => User, (user) => user.entries, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -50,6 +60,10 @@ export class WeeklyEntry {
   @ManyToOne(() => Circle, (circle) => circle.entries, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'circleId' })
   circle: Circle;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'voidedBy' })
+  voidedByUser: User | null;
 }
 
 // Compound indexes are defined in migrations

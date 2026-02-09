@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -18,6 +19,7 @@ import { selectUsers, selectUsersLoading, selectUsersPagination } from '../../..
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     MatCardModule,
     MatTableModule,
     MatPaginatorModule,
@@ -47,7 +49,9 @@ import { selectUsers, selectUsersLoading, selectUsersPagination } from '../../..
             <table mat-table [dataSource]="(users$ | async) ?? []">
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.name' | translate }}</th>
-                <td mat-cell *matCellDef="let user">{{ user.name }}</td>
+                <td mat-cell *matCellDef="let user">
+                  <a class="user-link" [routerLink]="['/admin/users', user.id]">{{ user.name }}</a>
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="email">
@@ -84,6 +88,8 @@ import { selectUsers, selectUsersLoading, selectUsersPagination } from '../../..
     .search-field { width: 300px; margin-bottom: 16px; }
     table { width: 100%; }
     .loading-container { display: flex; justify-content: center; padding: 48px; }
+    .user-link { color: #1976d2; text-decoration: none; }
+    .user-link:hover { text-decoration: underline; }
   `],
 })
 export class AdminUsersComponent implements OnInit {

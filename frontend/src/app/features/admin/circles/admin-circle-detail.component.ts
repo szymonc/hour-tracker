@@ -117,7 +117,9 @@ import {
               <table mat-table [dataSource]="members()">
                 <ng-container matColumnDef="name">
                   <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.name' | translate }}</th>
-                  <td mat-cell *matCellDef="let m">{{ m.userName }}</td>
+                  <td mat-cell *matCellDef="let m">
+                    <a class="user-link" [routerLink]="['/admin/users', m.userId]">{{ m.userName }}</a>
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="email">
                   <th mat-header-cell *matHeaderCellDef>{{ 'admin.users.email' | translate }}</th>
@@ -220,6 +222,8 @@ import {
     table { width: 100%; }
     .loading-container { display: flex; justify-content: center; padding: 32px; }
     .error-message { color: var(--mat-form-field-error-text-color, #b71c1c); margin-top: 12px; }
+    .user-link { color: #1976d2; text-decoration: none; }
+    .user-link:hover { text-decoration: underline; }
     .mat-column-actions { width: 120px; }
     .mat-column-trackingStartDate { width: 220px; }
     .action-buttons { display: flex; justify-content: flex-end; gap: 4px; }

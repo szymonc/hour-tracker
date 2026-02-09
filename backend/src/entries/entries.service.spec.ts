@@ -223,7 +223,8 @@ describe('EntriesService', () => {
         weekStart: '2024-01-15',
       });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledTimes(4);
+      // 4 filter conditions + 1 voidedAt IS NULL
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledTimes(5);
     });
 
     it('should limit pageSize to 100', async () => {

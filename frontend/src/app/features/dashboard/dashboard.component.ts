@@ -17,6 +17,7 @@ import {
   selectPeriodTotalHours,
   selectError,
 } from '../../store/summaries/summaries.reducer';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,6 +40,26 @@ import {
           {{ 'nav.logHours' | translate }}
         </button>
       </header>
+
+      @if (user$ | async; as user) {
+        @if (!user.telegramChatId && telegramBotUsername) {
+          <mat-card class="telegram-banner">
+            <mat-card-content>
+              <div class="telegram-banner-content">
+                <mat-icon class="telegram-banner-icon">notifications_active</mat-icon>
+                <div class="telegram-banner-text">
+                  <strong>{{ 'dashboard.telegramBanner.title' | translate }}</strong>
+                  <span>{{ 'dashboard.telegramBanner.message' | translate }}</span>
+                </div>
+                <a [href]="getTelegramDeepLink(user.id)" mat-raised-button color="accent" target="_blank">
+                  <mat-icon>send</mat-icon>
+                  {{ 'profile.connectTelegram' | translate }}
+                </a>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      }
 
       @if (error$ | async; as errorMessage) {
         <div class="error-container">
@@ -224,6 +245,37 @@ import {
       }
     }
 
+    .telegram-banner {
+      margin-bottom: 24px;
+      border-left: 4px solid #0088cc;
+      background-color: #e3f2fd;
+    }
+
+    .telegram-banner-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .telegram-banner-icon {
+      color: #0088cc;
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+
+    .telegram-banner-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      span {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 14px;
+      }
+    }
+
     @media (max-width: 600px) {
       .dashboard-header {
         flex-direction: column;
@@ -233,6 +285,11 @@ import {
         h1 {
           font-size: 24px;
         }
+      }
+
+      .telegram-banner-content {
+        flex-direction: column;
+        text-align: center;
       }
     }
   `],
@@ -246,6 +303,7 @@ export class DashboardComponent implements OnInit {
   isLoading$ = this.store.select(selectIsLoading);
   periodTotal$ = this.store.select(selectPeriodTotalHours);
   error$ = this.store.select(selectError);
+  telegramBotUsername = environment.telegramBotUsername;
 
   ngOnInit(): void {
     this.loadData();
@@ -265,6 +323,10 @@ export class DashboardComponent implements OnInit {
     const date = new Date(weekStart);
     const lang = this.translate.currentLang || 'en';
     return date.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric' });
+  }
+
+  getTelegramDeepLink(userId: string): string {
+    return `https://t.me/${this.telegramBotUsername}?start=${userId}`;
   }
 
   getStatusTranslation(status: string): string {
