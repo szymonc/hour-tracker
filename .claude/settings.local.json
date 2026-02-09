@@ -25,7 +25,12 @@
       "Bash(done)",
       "Bash(ls:*)",
       "Bash(tree:*)",
-      "Bash(npm show:*)"
+      "Bash(npm show:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx ng build:*)",
+      "Bash(npx jest:*)",
+      "Bash(npm start)",
+      "Bash(npm run start:dev:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

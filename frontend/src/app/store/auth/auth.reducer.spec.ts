@@ -19,7 +19,9 @@ describe('Auth Reducer', () => {
     role: 'user',
     authProvider: 'local',
     phoneNumber: '+34612345678',
+    telegramChatId: null,
     isActive: true,
+    isApproved: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -225,7 +227,9 @@ describe('Auth Selectors', () => {
     role: 'user',
     authProvider: 'local',
     phoneNumber: '+34612345678',
+    telegramChatId: null,
     isActive: true,
+    isApproved: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

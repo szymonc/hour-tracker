@@ -35,6 +35,7 @@ export class CallbackComponent implements OnInit {
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
     const error = this.route.snapshot.queryParamMap.get('error');
+    const redirect = this.route.snapshot.queryParamMap.get('redirect');
 
     if (error) {
       this.router.navigate(['/login'], { queryParams: { error } });
@@ -42,7 +43,7 @@ export class CallbackComponent implements OnInit {
     }
 
     if (token) {
-      this.store.dispatch(AuthActions.googleLoginCallback({ token }));
+      this.store.dispatch(AuthActions.googleLoginCallback({ token, redirect }));
     } else {
       this.router.navigate(['/login']);
     }

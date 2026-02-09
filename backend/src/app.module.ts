@@ -13,6 +13,7 @@ import { EntriesModule } from './entries/entries.module';
 import { AdminModule } from './admin/admin.module';
 import { ReportsModule } from './reports/reports.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { TelegramModule } from './telegram/telegram.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -45,6 +46,13 @@ import { HealthModule } from './health/health.module';
 
         // Frontend
         FRONTEND_URL: Joi.string().default('http://localhost:4200'),
+
+        // Backend URL (for constructing one-time login links)
+        BACKEND_URL: Joi.string().default('http://localhost:3000'),
+
+        // Telegram
+        TELEGRAM_BOT_TOKEN: Joi.string().optional().allow(''),
+        TELEGRAM_BOT_USERNAME: Joi.string().optional().allow(''),
 
         // Rate limiting
         THROTTLE_TTL: Joi.number().default(60000),
@@ -95,6 +103,7 @@ import { HealthModule } from './health/health.module';
     AdminModule,
     ReportsModule,
     RemindersModule,
+    TelegramModule,
     HealthModule,
   ],
   providers: [

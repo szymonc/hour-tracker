@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { map, exhaustMap, catchError, tap } from 'rxjs/operators';
@@ -11,6 +12,7 @@ import { AdminDashboard, PendingUser } from './admin.reducer';
 export class AdminEffects {
   private actions$ = inject(Actions);
   private http = inject(HttpClient);
+  private snackBar = inject(MatSnackBar);
 
   loadDashboard$ = createEffect(() =>
     this.actions$.pipe(
@@ -238,5 +240,41 @@ export class AdminEffects {
           )
       )
     )
+  );
+
+  sendTelegramReminder$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AdminActions.sendTelegramReminder),
+      exhaustMap(({ userId }) =>
+        this.http.post(`${environment.apiUrl}/admin/users/${userId}/send-telegram-reminder`, {}).pipe(
+          map(() => AdminActions.sendTelegramReminderSuccess({ userId })),
+          catchError((error) =>
+            of(AdminActions.sendTelegramReminderFailure({ error: error.error?.message || 'Failed to send reminder' }))
+          )
+        )
+      )
+    )
+  );
+
+  sendTelegramReminderSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AdminActions.sendTelegramReminderSuccess),
+        tap(() => {
+          this.snackBar.open('Recordatorio enviado por Telegram', 'OK', { duration: 3000 });
+        })
+      ),
+    { dispatch: false }
+  );
+
+  sendTelegramReminderFailure$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AdminActions.sendTelegramReminderFailure),
+        tap(({ error }) => {
+          this.snackBar.open(error || 'Error al enviar recordatorio', 'OK', { duration: 5000 });
+        })
+      ),
+    { dispatch: false }
   );
 }

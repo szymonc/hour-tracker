@@ -15,6 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AuthActions } from '../../store/auth/auth.actions';
 import { selectUser, selectIsLoading, selectError } from '../../store/auth/auth.selectors';
 import { LanguageService } from '../../core/services/language.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -77,6 +78,30 @@ import { LanguageService } from '../../core/services/language.service';
                 }
               </mat-select>
             </mat-form-field>
+
+            <mat-divider class="section-divider"></mat-divider>
+
+            <h3>Telegram</h3>
+            @if (user.telegramChatId) {
+              <div class="telegram-status connected">
+                <mat-icon color="primary">check_circle</mat-icon>
+                <span>{{ 'profile.telegramConnected' | translate }}</span>
+              </div>
+            } @else {
+              <p class="telegram-instructions">{{ 'profile.telegramInstructions' | translate }}</p>
+              @if (telegramBotUsername) {
+                <a
+                  [href]="getTelegramDeepLink(user.id)"
+                  mat-raised-button
+                  color="accent"
+                  target="_blank">
+                  <mat-icon>send</mat-icon>
+                  {{ 'profile.connectTelegram' | translate }}
+                </a>
+              } @else {
+                <p class="telegram-instructions">{{ 'profile.telegramNotConfigured' | translate }}</p>
+              }
+            }
           }
         </mat-card-content>
       </mat-card>
@@ -110,6 +135,22 @@ import { LanguageService } from '../../core/services/language.service';
     .section-divider {
       margin: 32px 0;
     }
+
+    .telegram-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      &.connected {
+        color: #2e7d32;
+      }
+    }
+
+    .telegram-instructions {
+      color: rgba(0, 0, 0, 0.6);
+      margin-bottom: 16px;
+    }
   `],
 })
 export class ProfileComponent implements OnInit {
@@ -120,6 +161,7 @@ export class ProfileComponent implements OnInit {
   user$ = this.store.select(selectUser);
   isLoading$ = this.store.select(selectIsLoading);
   error$ = this.store.select(selectError);
+  telegramBotUsername = environment.telegramBotUsername;
 
   phoneForm: FormGroup = this.fb.group({
     phoneNumber: ['', [Validators.required, Validators.pattern(/^\+[1-9]\d{1,14}$/)]],
@@ -142,5 +184,9 @@ export class ProfileComponent implements OnInit {
 
   onLanguageChange(langCode: string): void {
     this.languageService.setLanguage(langCode);
+  }
+
+  getTelegramDeepLink(userId: string): string {
+    return `https://t.me/${this.telegramBotUsername}?start=${userId}`;
   }
 }

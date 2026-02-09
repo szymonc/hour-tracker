@@ -255,4 +255,21 @@ export class AdminController {
     await this.adminService.declineUser(id);
     return { success: true };
   }
+
+  @Post('users/:id/send-telegram-reminder')
+  @ApiOperation({ summary: 'Send Telegram reminder to user' })
+  @ApiResponse({ status: 200, description: 'Reminder sent' })
+  @ApiResponse({ status: 400, description: 'User has not connected Telegram' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async sendTelegramReminder(@Param('id', ParseUUIDPipe) id: string) {
+    await this.adminService.sendTelegramReminder(id);
+    return { success: true };
+  }
+
+  @Get('telegram-bot')
+  @ApiOperation({ summary: 'Get Telegram bot username for deep links' })
+  @ApiResponse({ status: 200, description: 'Bot username returned' })
+  async getTelegramBot() {
+    return { botUsername: this.adminService.getTelegramBotUsername() };
+  }
 }

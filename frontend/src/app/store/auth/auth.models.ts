@@ -5,6 +5,7 @@ export interface User {
   role: 'user' | 'admin';
   authProvider: 'local' | 'google';
   phoneNumber: string | null;
+  telegramChatId: string | null;
   isActive: boolean;
   isApproved: boolean;
   createdAt: string;

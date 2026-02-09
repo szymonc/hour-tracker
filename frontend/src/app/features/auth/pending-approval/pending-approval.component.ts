@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthActions } from '../../../store/auth/auth.actions';
@@ -17,6 +18,7 @@ import { selectUser } from '../../../store/auth/auth.selectors';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    RouterModule,
     TranslateModule,
   ],
   template: `
