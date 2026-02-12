@@ -77,6 +77,9 @@ export class User {
   @Index()
   isApproved: boolean;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  lastReminderSentAt: Date | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 

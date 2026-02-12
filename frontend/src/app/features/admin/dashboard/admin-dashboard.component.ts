@@ -123,6 +123,11 @@ import {
                       {{ user.status === 'missing' ? ('admin.dashboard.missing' | translate) : user.totalHours + 'h' }}
                     </span>
                     @if (user.telegramChatId) {
+                      @if (user.lastReminderSentAt) {
+                        <span class="last-reminder-time" [matTooltip]="(user.lastReminderSentAt | date:'medium') || ''">
+                          {{ user.lastReminderSentAt | date:'short' }}
+                        </span>
+                      }
                       <button
                         mat-icon-button
                         color="primary"
@@ -333,6 +338,12 @@ import {
       display: flex;
       align-items: center;
       gap: 4px;
+    }
+
+    .last-reminder-time {
+      font-size: 11px;
+      color: rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
     }
 
     .user-row, .entry-row {

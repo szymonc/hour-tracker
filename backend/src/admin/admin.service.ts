@@ -20,6 +20,7 @@ export interface MissingUser {
   email: string;
   phoneNumber: string | null;
   telegramChatId: string | null;
+  lastReminderSentAt: string | null;
   totalHours: number;
   status: WeeklyStatus;
 }
@@ -120,6 +121,7 @@ export class AdminService {
           email: user.email,
           phoneNumber: user.phoneNumber,
           telegramChatId: user.telegramChatId,
+          lastReminderSentAt: user.lastReminderSentAt?.toISOString() ?? null,
           totalHours: 0,
           status: WeeklyStatus.MISSING,
         });
@@ -134,6 +136,7 @@ export class AdminService {
             email: user.email,
             phoneNumber: user.phoneNumber,
             telegramChatId: user.telegramChatId,
+            lastReminderSentAt: user.lastReminderSentAt?.toISOString() ?? null,
             totalHours: 0,
             status: WeeklyStatus.MISSING,
           });
@@ -146,6 +149,7 @@ export class AdminService {
           email: user.email,
           phoneNumber: user.phoneNumber,
           telegramChatId: user.telegramChatId,
+          lastReminderSentAt: user.lastReminderSentAt?.toISOString() ?? null,
           totalHours: data.totalHours,
           status: WeeklyStatus.UNDER_TARGET,
         });
@@ -180,6 +184,7 @@ export class AdminService {
         email: user.email,
         phoneNumber: user.phoneNumber,
         telegramChatId: user.telegramChatId,
+        lastReminderSentAt: user.lastReminderSentAt?.toISOString() ?? null,
         totalHours: 0,
         status: WeeklyStatus.MISSING,
         consecutiveMissingWeeks: 2,
@@ -622,7 +627,7 @@ export class AdminService {
     await this.usersRepository.remove(user);
   }
 
-  async sendTelegramReminder(userId: string): Promise<void> {
+  async sendTelegramReminder(userId: string): Promise<{ sentAt: Date }> {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -638,6 +643,12 @@ export class AdminService {
     const loginUrl = `${backendUrl}/api/v1/auth/one-time/${token}`;
 
     await this.telegramService.sendReminder(user.telegramChatId, user.name, loginUrl);
+
+    const sentAt = new Date();
+    user.lastReminderSentAt = sentAt;
+    await this.usersRepository.save(user);
+
+    return { sentAt };
   }
 
   getTelegramBotUsername(): string | null {

@@ -30,7 +30,7 @@ export const AdminActions = createActionGroup({
 
     // Telegram Reminders
     'Send Telegram Reminder': props<{ userId: string }>(),
-    'Send Telegram Reminder Success': props<{ userId: string }>(),
+    'Send Telegram Reminder Success': props<{ userId: string; sentAt: string }>(),
     'Send Telegram Reminder Failure': props<{ error: string }>(),
 
     // Circles

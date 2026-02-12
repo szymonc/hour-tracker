@@ -246,8 +246,8 @@ export class AdminEffects {
     this.actions$.pipe(
       ofType(AdminActions.sendTelegramReminder),
       exhaustMap(({ userId }) =>
-        this.http.post(`${environment.apiUrl}/admin/users/${userId}/send-telegram-reminder`, {}).pipe(
-          map(() => AdminActions.sendTelegramReminderSuccess({ userId })),
+        this.http.post<{ success: boolean; sentAt: string }>(`${environment.apiUrl}/admin/users/${userId}/send-telegram-reminder`, {}).pipe(
+          map((response) => AdminActions.sendTelegramReminderSuccess({ userId, sentAt: response.sentAt })),
           catchError((error) =>
             of(AdminActions.sendTelegramReminderFailure({ error: error.error?.message || 'Failed to send reminder' }))
           )

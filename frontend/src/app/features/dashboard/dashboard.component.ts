@@ -42,7 +42,12 @@ import { environment } from '../../../environments/environment';
       </header>
 
       @if (user$ | async; as user) {
-        @if (!user.telegramChatId && telegramBotUsername) {
+        @if (user.telegramChatId) {
+          <div class="telegram-connected">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ 'profile.telegramConnected' | translate }}</span>
+          </div>
+        } @else if (telegramBotUsername) {
           <mat-card class="telegram-banner">
             <mat-card-content>
               <div class="telegram-banner-content">
@@ -242,6 +247,21 @@ import { environment } from '../../../environments/environment';
       button mat-icon {
         margin-right: 8px;
         vertical-align: middle;
+      }
+    }
+
+    .telegram-connected {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      color: #2e7d32;
+      font-size: 14px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
       }
     }
 

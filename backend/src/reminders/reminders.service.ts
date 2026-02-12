@@ -12,6 +12,8 @@ export interface ReminderTargetSummary {
   userName: string;
   userEmail: string;
   phoneNumber: string | null;
+  telegramChatId: string | null;
+  lastReminderSentAt: Date | null;
   status: WeeklyStatusEnum;
   totalHours: number;
 }
@@ -92,6 +94,8 @@ export class RemindersService {
           userName: user.name,
           userEmail: user.email,
           phoneNumber: user.phoneNumber,
+          telegramChatId: user.telegramChatId ?? null,
+          lastReminderSentAt: user.lastReminderSentAt ?? null,
           status,
           totalHours: data?.totalHours || 0,
         };
@@ -164,6 +168,8 @@ export class RemindersService {
       userName: t.user?.name || '',
       userEmail: t.user?.email || '',
       phoneNumber: t.user?.phoneNumber || null,
+      telegramChatId: t.user?.telegramChatId ?? null,
+      lastReminderSentAt: t.user?.lastReminderSentAt ?? null,
       status: t.weeklyStatus,
       totalHours: Number(t.totalHours),
     }));

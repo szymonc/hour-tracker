@@ -211,9 +211,18 @@ export const adminFeature = createFeature({
       telegramSending: userId,
       error: null,
     })),
-    on(AdminActions.sendTelegramReminderSuccess, (state) => ({
+    on(AdminActions.sendTelegramReminderSuccess, (state, { userId, sentAt }) => ({
       ...state,
       telegramSending: null,
+      dashboard: state.dashboard ? {
+        ...state.dashboard,
+        missingPreviousWeek: {
+          ...state.dashboard.missingPreviousWeek,
+          users: state.dashboard.missingPreviousWeek.users.map((u: any) =>
+            u.id === userId ? { ...u, lastReminderSentAt: sentAt } : u
+          ),
+        },
+      } : null,
     })),
     on(AdminActions.sendTelegramReminderFailure, (state, { error }) => ({
       ...state,

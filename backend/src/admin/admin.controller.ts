@@ -322,8 +322,8 @@ export class AdminController {
   @ApiResponse({ status: 400, description: 'User has not connected Telegram' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async sendTelegramReminder(@Param('id', ParseUUIDPipe) id: string) {
-    await this.adminService.sendTelegramReminder(id);
-    return { success: true };
+    const { sentAt } = await this.adminService.sendTelegramReminder(id);
+    return { success: true, sentAt };
   }
 
   @Get('telegram-bot')
